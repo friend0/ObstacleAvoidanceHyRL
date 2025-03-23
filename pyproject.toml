@@ -1,0 +1,15 @@
+[project]
+name = "hyrl"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+  "shimmy",
+  "gym",
+  "torch",
+  "scikit-learn",
+  "numpy",
+  "matplotlib",
+  "stable-baselines3",
+]
