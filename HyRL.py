@@ -1,79 +1,90 @@
 import numpy as np
-import matplotlib.pyplot as plt
 from numpy import linalg as LA
 from obstacleavoidance_env import ObstacleAvoidance
 from stable_baselines3 import DQN
-from utils import find_critical_points, state_to_observation_OA, \
-    get_state_from_env_OA, find_X_i, \
-        train_hybrid_agent, M_i, M_ext, HyRL_agent, \
-            simulate_obstacleavoidance, visualize_M_ext
+from utils import (
+    find_critical_points,
+    state_to_observation_OA,
+    get_state_from_env_OA,
+    find_X_i,
+    M_i,
+    M_ext,
+    HyRL_agent,
+    visualize_M_ext,
+)
+from dataclasses import dataclass
+from enum import Enum
 
-if __name__ == '__main__':
-    # Loading in the trained agent
-    model = DQN.load("dqn_obstacleavoidance")
-    
-    # finding the set of critical points
-    resolution = 30
-    x_ = np.linspace(0, 3, resolution)
-    y_ = np.linspace(-1.5, 1.5, resolution)
-    state_difference = LA.norm(np.array([x_[1]-x_[0], y_[1]-y_[0]]))
-    initial_points = []
 
-    for idx in range(resolution):
-        for idy in range(resolution):
-            initial_points.append(np.array([x_[idx], y_[idy]], 
-                                           dtype=np.float32))
-    
-    M_star = find_critical_points(initial_points, state_difference, model, 
-                                  ObstacleAvoidance, min_state_difference=1e-2, 
-                                  steps=5, threshold=1e-1, n_clusters=8, 
-                                  custom_state_to_observation=state_to_observation_OA,
-                                  get_state_from_env=get_state_from_env_OA,
-                                  verbose=False)
-    M_star = M_star[np.argsort(M_star[:,0])]
-    
-    # building sets M_0 and M_1
-    M_0 = M_i(M_star, index=0)
-    M_1 = M_i(M_star, index=1)
-    
-    # finding the extension sets
-    X_0 = find_X_i(M_0, model)
-    X_1 = find_X_i(M_1, model)
-    M_ext0 = M_ext(M_0, X_0)
-    M_ext1 = M_ext(M_1, X_1)
-    
-    # visualizing the extended sets
-    visualize_M_ext(M_ext0, figure_number=1)
-    visualize_M_ext(M_ext1, figure_number=2)
-    
-    # building the environment for hybrid learning
-    env_0 = ObstacleAvoidance(hybridlearning=True, M_ext=M_ext0)
-    env_1 = ObstacleAvoidance(hybridlearning=True, M_ext=M_ext1)
-    
-    # training the new agents
-    training2 = False
-    if training2:
-        agent_0 = train_hybrid_agent(env_0, load_agent='dqn_obstacleavoidance', 
-                                      save_name='dqn_obstacleavoidance_0',
-                                      M_exti=M_ext0, timesteps=300000)
-        agent_1 = train_hybrid_agent(env_1, load_agent='dqn_obstacleavoidance', 
-                                      save_name='dqn_obstacleavoidance_1',
-                                      M_exti=M_ext1, timesteps=300000)
-    else:
-        agent_0 = DQN.load('dqn_obstacleavoidance_0')
-        agent_1 = DQN.load('dqn_obstacleavoidance_1')
-    
-    # simulation the hybrid agent compared to the original agent    
-    starting_conditions = [np.array([0., 0.0], dtype=np.float32),
-                           np.array([0., 0.055], dtype=np.float32),
-                           np.array([0., -.055], dtype=np.float32),
-                           np.array([0., 0.15], dtype=np.float32),
-                           np.array([0., -.15], dtype=np.float32),]
-    for q in range(2):
-        for state_init in starting_conditions:
-            hybrid_agent = HyRL_agent(agent_0, agent_1, M_ext0, M_ext1, 
-                                      q_init=q)
-            simulate_obstacleavoidance(hybrid_agent, model, state_init, 
-                                       figure_number=3+q)
-        save_name = 'OA_HyRLDQN_Sim_q'+str(q)+'.svg'
-        plt.savefig(save_name, format='svg')
+@dataclass
+class State:
+    x: float
+    y: float
+
+
+class AgentSelect(Enum):
+    agent_0 = 0
+    agent_1 = 1
+
+
+class ObstacleAvoidancePlanner:
+    def __init__(
+        self,
+        dqn="dqn_obstacleavoidance",
+        q: AgentSelect = AgentSelect.agent_0,
+        resolution=30,
+        x_range=(0, 3),
+        y_range=(-1.5, 1.5),
+        visualize=False,
+    ) -> None:
+        self.model = DQN.load(dqn)
+        self.resolution = resolution
+        self.state_difference = LA.norm(
+            np.array([x_range[1] - x_range[0], y_range[1] - y_range[0]])
+        )
+        self.initial_points = []
+        for idx in range(resolution):
+            for idy in range(resolution):
+                self.initial_points.append(
+                    np.array([x_range[idx], y_range[idy]], dtype=np.float32)
+                )
+
+        self.m_star = find_critical_points(
+            self.initial_points,
+            self.state_difference,
+            self.model,
+            ObstacleAvoidance,
+            min_state_difference=1e-2,
+            steps=5,
+            threshold=1e-1,
+            n_clusters=8,
+            custom_state_to_observation=state_to_observation_OA,
+            get_state_from_env=get_state_from_env_OA,
+            verbose=False,
+        )
+        self.m_star = self.m_star[np.argsort(self.m_star[:, 0])]
+
+        # building sets M_0 and M_1
+        m_0 = M_i(self.m_star, index=0)
+        m_1 = M_i(self.m_star, index=1)
+
+        # finding the extension sets
+        x_0 = find_X_i(m_0, self.model)
+        x_1 = find_X_i(m_1, self.model)
+        m_ext0 = M_ext(m_0, x_0)
+        m_ext1 = M_ext(m_1, x_1)
+
+        if visualize:
+            # visualizing the extended sets
+            visualize_M_ext(m_ext0, figure_number=1)
+            visualize_M_ext(m_ext1, figure_number=2)
+
+        agent_0 = DQN.load("dqn_obstacleavoidance_0")
+        agent_1 = DQN.load("dqn_obstacleavoidance_1")
+        self.hybrid_agent = HyRL_agent(agent_0, agent_1, m_ext0, m_ext1, q_init=q.value)
+
+    def control(self, state: State):
+        action_hyb, switch = self.hybrid_agent.predict(state_hyb + disturbance)
+        env_hyb.state = state_hyb
+        _, reward_hyb, done, _ = env_hyb.step(action_hyb)
+        state_hyb = get_state_from_env_OA(env_hyb)
