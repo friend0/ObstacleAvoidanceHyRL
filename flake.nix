@@ -42,7 +42,40 @@
             else
               echo "❌ Failed to activate venv: .venv/bin/activate not found"
             fi
+
+            if [ "$SHELL" != "$(command -v zsh)" ]; then
+              export SHELL="$(command -v zsh)"
+              exec zsh
+            fi
           '';
+
+      # devShells.dev = with pkgs; mkShell {
+      #   buildInputs = [
+      #     cargo
+      #     clippy
+      #     rustc
+      #     rustfmt
+      #     pre-commit
+      #     rerun
+      #     protobuf
+      #   ];
+      #   shellHook = ''
+      #     export GIT_CONFIG=$PWD/.gitconfig
+      #     export CARGO_NET_GIT_FETCH_WITH_CLI=true
+      #     export GIT_SSH_COMMAND="ssh -F ~/.ssh/config"
+      #     ${if pkgs.stdenv.isLinux then ''
+      #       export PKG_CONFIG_PATH="${pkgs.systemd}/lib/pkgconfig:$PKG_CONFIG_PATH"
+      #     '' else ""}
+      #
+      #     ${if pkgs.stdenv.isDarwin then ''
+      #       echo "Running on macOS, using Darwin-specific dependencies."
+      #     '' else ""}
+      #
+      #     echo "Entering Rust development environment..."
+      #     cargo fetch # Pre-fetch dependencies
+      #
+      #   '';
+      # };
         };
       });
     };
