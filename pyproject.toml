@@ -10,6 +10,9 @@ dependencies = [
   "torch",
   "scikit-learn",
   "numpy",
-  "matplotlib",
+  # "matplotlib",
   "stable-baselines3",
 ]
+
+[dependency-groups]
+dev = ["matplotlib"]

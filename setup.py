@@ -15,7 +15,6 @@ setup(
         "torch",
         "scikit-learn",
         "numpy",
-        "matplotlib",
         "stable-baselines3",
     ],
     classifiers=[],
