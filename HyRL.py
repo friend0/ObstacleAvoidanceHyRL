@@ -75,5 +75,5 @@ if __name__ == '__main__':
                                       q_init=q)
             simulate_obstacleavoidance(hybrid_agent, model, state_init, 
                                        figure_number=3+q)
-        save_name = 'OA_HyRLDQN_Sim_q'+str(q)+'.eps'
-        plt.savefig(save_name, format='eps')
+        save_name = 'OA_HyRLDQN_Sim_q'+str(q)+'.svg'
+        plt.savefig(save_name, format='svg')

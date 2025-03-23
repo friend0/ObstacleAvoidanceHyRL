@@ -3,7 +3,7 @@ import matplotlib
 import matplotlib.pyplot as plt
 from stable_baselines3 import DQN
 from obstacleavoidance_env import ObstacleAvoidance
-matplotlib.rcParams['text.usetex'] = True
+# matplotlib.rcParams['text.usetex'] = True
 
 def compute_observation(x, y, x_obst=1.5, y_obst=0., radius_obst=0.75, 
                         x_goal=3.0, y_goal=0.):
@@ -49,4 +49,4 @@ env = ObstacleAvoidance()
 model = DQN.load("dqn_obstacleavoidance", env)
 
 plot_policy(model)
-plt.savefig('ObstAvoid_criticPoint_policyMap.eps', format='eps')
+plt.savefig('ObstAvoid_criticPoint_policyMap.svg', format='svg')
