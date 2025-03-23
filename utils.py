@@ -343,32 +343,31 @@ def simulate_obstacleavoidance(
     score_or, score_hyb = 0, 0
     sign = 1
     stop_appending_or, stop_appending_hyb = False, False
-    while done == False:
+    while not done:
         noise = noise_mag * sign
         disturbance = np.array([0, noise], dtype=np.float32)
 
         action_or, _ = original_agent.predict(
             state_to_observation_OA(state_or + disturbance), deterministic=True
         )
-        action_hyb, switch = hybrid_agent.predict(state_hyb + disturbance)
-
         env_or.state = state_or
-        env_hyb.state = state_hyb
-
         _, reward_or, done, _ = env_or.step(action_or)
-        _, reward_hyb, done, _ = env_hyb.step(action_hyb)
         state_or = get_state_from_env_OA(env_or)
+
+        action_hyb, switch = hybrid_agent.predict(state_hyb + disturbance)
+        env_hyb.state = state_hyb
+        _, reward_hyb, done, _ = env_hyb.step(action_hyb)
         state_hyb = get_state_from_env_OA(env_hyb)
 
         if env_or.terminate:
             stop_appending_or = True
-        if stop_appending_or == False:
+        if not stop_appending_or:
             states_or.append(state_or)
             score_or += reward_or
 
         if env_hyb.terminate:
             stop_appending_hyb = True
-        if stop_appending_hyb == False:
+        if not stop_appending_hyb:
             states_hyb.append(state_hyb)
             score_hyb += reward_hyb
             switches.append(switch * states_hyb[-1])
@@ -456,4 +455,3 @@ def visualize_M_ext(M_ext, figure_number, resolution=50):
     plt.xlabel("$x$", fontsize=22)
     plt.ylabel("$y$", fontsize=22)
     plt.tight_layout()
-
