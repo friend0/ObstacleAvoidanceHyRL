@@ -1,45 +1,46 @@
 {
-  description = "Development environment for ObstacleAvoidanceHyRL";
+  description = "a nix-flake-based python development environment";
 
-  inputs = {
-    nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
-    flake-utils.url = "github:numtide/flake-utils";
-  };
+  inputs.nixpkgs.url = "https://flakehub.com/f/nixos/nixpkgs/0.1.*.tar.gz";
 
-  outputs = { self, nixpkgs, flake-utils }:
-    flake-utils.lib.eachDefaultSystem (system:
-      let
+  outputs = { self, nixpkgs }:
+    let
+      supportedsystems = [ "x86_64-linux" "aarch64-linux" "x86_64-darwin" "aarch64-darwin" ];
+      foreachsupportedsystem = f: nixpkgs.lib.genattrs supportedsystems (system: f {
         pkgs = import nixpkgs { inherit system; };
+      });
+    in
+    {
+      devshells = foreachsupportedsystem ({ pkgs }: {
+        default = pkgs.mkshell {
+          packages = with pkgs; [ python313 ] ++
+            (with pkgs.python313packages; [
+              uv
+              pkgs.zsh
+              pkgs.black
+              pkgs.python3
+              pkgs.protobuf
+            ]);
 
-        # Create a Python environment with the required packages.
-        pythonEnv = pkgs.python3.withPackages (ps: with ps; [
-          gym
-          scikit-learn
-          torch
-          numpy
-          matplotlib
-          stable-baselines3
-        ]);
-      in {
-        # Optionally, you can build the package defined by your setup.py.
-        packages.default = pkgs.python3Packages.buildPythonPackage {
-          pname = "hyrl";
-          version = "1.0.0";
-          src = ./.;
-        };
+          shellhook = ''
+            echo "🔧 setting up python virtual environment with uv..."
 
-        devShell = pkgs.mkShell {
-          buildInputs = [
-            pythonEnv
-            pkgs.git
-            # You might also want to add tools such as flake8, black, etc.
-          ];
+            # create venv if it doesn't exist
+            if [ ! -d ".venv" ]; then
+              echo "📦 no .venv found, creating with uv..."
+              uv venv
+            fi
 
-          shellHook = ''
-            echo "Welcome to the ObstacleAvoidanceHyRL development shell!"
-            echo "You can now run 'pip install -e .' to install the package in editable mode."
+            # activate the venv
+            if [ -f ".venv/bin/activate" ]; then
+              source .venv/bin/activate
+              echo "✅ activated python venv at .venv"
+              python --version
+            else
+              echo "❌ failed to activate venv: .venv/bin/activate not found"
+            fi
           '';
         };
-      }
-    );
+      });
+    };
 }
