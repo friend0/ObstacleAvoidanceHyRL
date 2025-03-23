@@ -12,6 +12,11 @@ dependencies = [
   "scikit-learn",
   "numpy",
   "stable-baselines3",
+  "betterproto>=1.2.5",
+  "grpcio-tools>=1.71.0",
+  "grpcio>=1.71.0",
+  "grpclib>=0.4.7",
+  "protobuf>=5.29.4",
 ]
 
 [tool.setuptools.package-data]
