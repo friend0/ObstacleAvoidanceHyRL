@@ -1,43 +1,46 @@
 {
-  description = "a nix-flake-based python development environment";
+  description = "A Nix-flake-based Python development environment";
 
-  inputs.nixpkgs.url = "https://flakehub.com/f/nixos/nixpkgs/0.1.*.tar.gz";
+  inputs.nixpkgs.url = "https://flakehub.com/f/NixOS/nixpkgs/0.1.*.tar.gz";
 
   outputs = { self, nixpkgs }:
     let
-      supportedsystems = [ "x86_64-linux" "aarch64-linux" "x86_64-darwin" "aarch64-darwin" ];
-      foreachsupportedsystem = f: nixpkgs.lib.genattrs supportedsystems (system: f {
+      supportedSystems = [ "x86_64-linux" "aarch64-linux" "x86_64-darwin" "aarch64-darwin" ];
+      forEachSupportedSystem = f: nixpkgs.lib.genAttrs supportedSystems (system: f {
         pkgs = import nixpkgs { inherit system; };
       });
     in
     {
-      devshells = foreachsupportedsystem ({ pkgs }: {
-        default = pkgs.mkshell {
+      devShells = forEachSupportedSystem ({ pkgs }: {
+        default = pkgs.mkShell {
           packages = with pkgs; [ python313 ] ++
-            (with pkgs.python313packages; [
+            (with pkgs.python313Packages; [
               uv
               pkgs.zsh
+              pkgs.neovim
               pkgs.black
+              pkgs.grpcurl
               pkgs.python3
               pkgs.protobuf
-            ]);
+            ]++
+            [ pkgs.zsh pkgs.neovim pkgs.black pkgs.grpcurl pkgs.protobuf pkgs.texlive.combined.scheme-basic ]);
 
-          shellhook = ''
-            echo "🔧 setting up python virtual environment with uv..."
+          shellHook = ''
+            echo "🔧 Setting up Python virtual environment with uv..."
 
-            # create venv if it doesn't exist
+            # Create venv if it doesn't exist
             if [ ! -d ".venv" ]; then
-              echo "📦 no .venv found, creating with uv..."
+              echo "📦 No .venv found, creating with uv..."
               uv venv
             fi
 
-            # activate the venv
+            # Activate the venv
             if [ -f ".venv/bin/activate" ]; then
               source .venv/bin/activate
-              echo "✅ activated python venv at .venv"
+              echo "✅ Activated Python venv at .venv"
               python --version
             else
-              echo "❌ failed to activate venv: .venv/bin/activate not found"
+              echo "❌ Failed to activate venv: .venv/bin/activate not found"
             fi
           '';
         };
