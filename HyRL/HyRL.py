@@ -1,10 +1,11 @@
 import HyRL
 import numpy as np
 from numpy import linalg as LA
-from HyRL.obstacleavoidance_env import ObstacleAvoidance
+from HyRL.obstacleavoidance_env import ObstacleAvoidance, BBox, Obstacle, Point
 from stable_baselines3 import DQN
 from HyRL.utils import (
     find_critical_points,
+    state_to_observation,
     state_to_observation_OA,
     get_state_from_env_OA,
     find_X_i,
@@ -37,15 +38,21 @@ class ObstacleAvoidancePlanner:
         dqn="dqn_obstacleavoidance",
         q: AgentSelect = AgentSelect.agent_0,
         resolution=30,
-        x_range=(0, 3),
-        y_range=(-1.5, 1.5),
+        bounds: BBox = BBox(x_min=0.0, x_max=3.0, y_min=-1.5, y_max=1.5),
+        obstacle: Obstacle = Obstacle(center=Point(x=1.5, y=0.0), r=0.75),
+        goal: Point = Point(x=3.0, y=0.0),
+        # x_range=(0, 3),
+        # y_range=(-1.5, 1.5),
         visualize=False,
     ) -> None:
-        self.model = DQN.load(self.MODELS / dqn)
         self.resolution = resolution
+        self.bounds = bounds
+        self.obstacle = obstacle
+        self.goal = goal
+        self.model = DQN.load(self.MODELS / dqn)
 
-        x_ = np.linspace(0, 3, resolution)
-        y_ = np.linspace(-1.5, 1.5, resolution)
+        x_ = np.linspace(self.bounds.x_min, self.bounds.x_max, resolution)
+        y_ = np.linspace(self.bounds.y_min, self.bounds.y_max, resolution)
 
         self.state_difference = LA.norm(np.array([x_[1] - x_[0], y_[1] - y_[0]]))
         self.initial_points = []
@@ -56,18 +63,19 @@ class ObstacleAvoidancePlanner:
                 )
 
         self.m_star = find_critical_points(
-            self.initial_points,
-            self.state_difference,
+            30,
+            self.bounds,
+            self.obstacle,
+            self.goal,
             self.model,
-            ObstacleAvoidance,
-            min_state_difference=1e-2,
-            steps=5,
-            threshold=1e-1,
-            n_clusters=8,
-            custom_state_to_observation=state_to_observation_OA,
+            environent=ObstacleAvoidance,
+            custom_state_to_observation=state_to_observation(obstacle, goal),
             get_state_from_env=get_state_from_env_OA,
-            verbose=False,
         )
+        if not self.m_star:
+            raise ValueError("No critical points found. Please check your parameters.")
+
+        # TODO: cleanup this sort
         self.m_star = self.m_star[np.argsort(self.m_star[:, 0])]
 
         # building sets M_0 and M_1
