@@ -6,6 +6,23 @@ from dataclasses import dataclass
 
 
 @dataclass
+class State:
+    x: float
+    y: float
+
+    def __getitem__(self, index: int) -> float:
+        if index == 0:
+            return self.x
+        elif index == 1:
+            return self.y
+        else:
+            raise IndexError("State supports indices 0 and 1 only.")
+
+    def __len__(self) -> int:
+        return 2
+
+
+@dataclass
 class BBox:
     x_min: float
     y_min: float

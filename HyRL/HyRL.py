@@ -1,7 +1,7 @@
 import HyRL
 import numpy as np
 from numpy import linalg as LA
-from HyRL.obstacleavoidance_env import ObstacleAvoidance, BBox, Obstacle, Point
+from HyRL.obstacleavoidance_env import ObstacleAvoidance, BBox, Obstacle, Point, State
 from stable_baselines3 import DQN
 from HyRL.utils import (
     find_critical_points,
@@ -17,12 +17,6 @@ from HyRL.utils import (
 from dataclasses import dataclass
 from enum import Enum
 from pathlib import Path
-
-
-@dataclass
-class State:
-    x: float
-    y: float
 
 
 class AgentSelect(Enum):
@@ -41,8 +35,6 @@ class ObstacleAvoidancePlanner:
         bounds: BBox = BBox(x_min=0.0, x_max=3.0, y_min=-1.5, y_max=1.5),
         obstacle: Obstacle = Obstacle(center=Point(x=1.5, y=0.0), r=0.75),
         goal: Point = Point(x=3.0, y=0.0),
-        # x_range=(0, 3),
-        # y_range=(-1.5, 1.5),
         visualize=False,
     ) -> None:
         self.resolution = resolution
@@ -98,7 +90,7 @@ class ObstacleAvoidancePlanner:
         self.hybrid_agent = HyRL_agent(agent_0, agent_1, m_ext0, m_ext1, q_init=q.value)
 
     def control(self, state: State):
-        action_hyb, switch = self.hybrid_agent.predict(state_hyb)
+        action_hyb, switch = self.hybrid_agent.predict(state)
         env_hyb.state = state_hyb
         _, reward_hyb, done, _ = env_hyb.step(action_hyb)
         state_hyb = get_state_from_env_OA(env_hyb)

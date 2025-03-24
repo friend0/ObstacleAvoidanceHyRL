@@ -6,7 +6,7 @@ import matplotlib
 import matplotlib.pyplot as plt
 from numpy import linalg as LA
 from sklearn.cluster import KMeans
-from HyRL.obstacleavoidance_env import ObstacleAvoidance, BBox, Obstacle, Point
+from HyRL.obstacleavoidance_env import ObstacleAvoidance, BBox, Obstacle, Point, State
 from stable_baselines3 import DQN
 from stable_baselines3.common.callbacks import (
     EvalCallback,
@@ -316,7 +316,7 @@ class M_ext:
         else:
             return False
 
-    def in_M_ext(self, state):
+    def in_M_ext(self, state: State):
         self.x, self.y = state[0], state[1]
         if self.M_i.index == 0:
             self.sign = 1
