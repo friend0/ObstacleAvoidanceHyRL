@@ -1,16 +1,20 @@
 import os
+import gym
 import numpy as np
 import torch as th
 import matplotlib
 import matplotlib.pyplot as plt
 from numpy import linalg as LA
 from sklearn.cluster import KMeans
-from HyRL.obstacleavoidance_env import ObstacleAvoidance
+from HyRL.obstacleavoidance_env import ObstacleAvoidance, BBox, Obstacle, Point
 from stable_baselines3 import DQN
 from stable_baselines3.common.callbacks import (
     EvalCallback,
     StopTrainingOnRewardThreshold,
 )
+
+from typing import Callable, Optional
+import numpy.typing as npt
 from stable_baselines3.common.monitor import Monitor
 
 # matplotlib.rcParams['text.usetex'] = True
@@ -22,14 +26,14 @@ def find_critical_points(
     obstacle,
     goal,
     model,
-    Env,
-    min_state_difference,
-    steps,
-    threshold,
+    environent: gym.Env,
+    min_state_difference=1e-2,
+    steps=5,
+    threshold=1e-1,
     n_clusters=8,
     custom_state_init=None,
-    custom_state_to_observation=None,
-    get_state_from_env=None,
+    custom_state_to_observation: Optional[Callable] = None,
+    get_state_from_env: Optional[Callable[[gym.Env], npt.NDArray[np.float32]]] = None,
     verbose=False,
 ):
     def generate_rod(center_point, dimension, state_difference):
@@ -85,7 +89,14 @@ def find_critical_points(
                 for start in start_points:
                     if custom_state_init is not None:
                         start = custom_state_init(start)
-                    env = Env(steps=steps, random_init=False, state_init=start)
+                    env = environent(
+                        steps=steps,
+                        random_init=False,
+                        state_init=start,
+                        bounds=bounds,
+                        obstacle=obstacle,
+                        goal=goal,
+                    )
                     if custom_state_to_observation is None:
                         obs = np.copy(start)
                     else:
@@ -100,6 +111,7 @@ def find_critical_points(
                     else:
                         end_points.append(get_state_from_env(env))
                     steps_left_total += steps_left
+
                 if steps_left_total == 0:
                     # compute the final length of the rod (after simulation)
                     rod_length_end = get_rod_length(end_points)
@@ -124,6 +136,28 @@ def find_critical_points(
     return cluster_centers
 
 
+def state_to_observation(
+    obstacle: Obstacle,
+    goal: Point,
+):
+    def so(
+        state,
+        x_obst=obstacle.center.x,
+        y_obst=obstacle.center.y,
+        radius_obst=obstacle.r,
+        x_goal=goal.x,
+        y_goal=goal.y,
+    ):
+        x, y = state[0], state[1]
+        dist_obst = max(
+            np.sqrt((x - x_obst) ** 2 + (y - y_obst) ** 2) - radius_obst, 0.0
+        )
+        dist_goal = np.sqrt((x - x_goal) ** 2 + (y - y_goal) ** 2)
+        return np.array([dist_obst, dist_goal, y], dtype=np.float32)
+
+    return so
+
+
 def state_to_observation_OA(
     state, x_obst=1.5, y_obst=0.0, radius_obst=0.75, x_goal=3.0, y_goal=0
 ):
@@ -133,7 +167,7 @@ def state_to_observation_OA(
     return np.array([dist_obst, dist_goal, y], dtype=np.float32)
 
 
-def get_state_from_env_OA(env):
+def get_state_from_env_OA(env: gym.Env):
     return np.array([env.x, env.y], dtype=np.float32)
 
 
