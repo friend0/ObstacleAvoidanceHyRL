@@ -17,8 +17,10 @@ from stable_baselines3.common.monitor import Monitor
 
 
 def find_critical_points(
-    initial_points,
-    state_difference,
+    resolution: int,
+    bounds,
+    obstacle,
+    goal,
     model,
     Env,
     min_state_difference,
@@ -43,8 +45,19 @@ def find_critical_points(
     def get_rod_length(rod_points):
         return LA.norm(rod_points[0] - rod_points[1])
 
-    # initialize the set of points to consider
+    # Create initial grid of points.
+    x_ = np.linspace(bounds.x_min, bounds.x_max, resolution)
+    y_ = np.linspace(bounds.y_min, bounds.y_max, resolution)
+    state_difference = LA.norm(np.array([x_[1] - x_[0], y_[1] - y_[0]]))
+    initial_points = [
+        np.array([x_[idx], y_[idy]], dtype=np.float32)
+        for idx in range(resolution)
+        for idy in range(resolution)
+    ]
+
     next_points = initial_points
+    point_ndim = next_points[0].ndim if next_points else 1
+    cluster_centers = None
     while state_difference > min_state_difference:
         new_points = []
         if verbose:

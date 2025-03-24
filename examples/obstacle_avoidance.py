@@ -1,3 +1,3 @@
 from HyRL import ObstacleAvoidancePlanner
 
-planner ObstacleAvoidancePlanner()
+planner = ObstacleAvoidancePlanner()
