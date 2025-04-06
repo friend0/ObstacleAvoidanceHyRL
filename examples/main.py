@@ -18,9 +18,11 @@ from HyRL.utils import (
 )
 from pathlib import Path
 
+MODELS = Path("HyRL/models")
+
 if __name__ == "__main__":
     # Loading in the trained agent
-    model = DQN.load(Path("HyRL/models") / "dqn_obstacleavoidance")
+    model = DQN.load(MODELS / "dqn_obstacleavoidance")
     bounds = BBox(x_min=0.0, x_max=3.0, y_min=-1.5, y_max=1.5)
     obstacle = Obstacle(center=Point(x=1.5, y=0.0), r=0.75)
     goal = Point(x=3.0, y=0.0)
@@ -64,23 +66,22 @@ if __name__ == "__main__":
     )
 
     # training the new agents
-    training2 = False
+    training2 = True
     if training2:
-        for radius in [0.25, 0.50]:
-            agent_0 = train_hybrid_agent(
-                env_0,
-                load_agent="dqn_obstacleavoidance",
-                save_name=f"dqn_obstacleavoidance_0_{radius*100}",
-                M_exti=M_ext0,
-                timesteps=300000,
-            )
-            agent_1 = train_hybrid_agent(
-                env_1,
-                load_agent="dqn_obstacleavoidance",
-                save_name=f"dqn_obstacleavoidance_1_{radius*100}",
-                M_exti=M_ext1,
-                timesteps=300000,
-            )
+        agent_0 = train_hybrid_agent(
+            env_0,
+            load_agent=MODELS / "dqn_obstacleavoidance",
+            save_name=MODELS / "dqn_obstacleavoidance_0",
+            M_exti=M_ext0,
+            timesteps=300000,
+        )
+        agent_1 = train_hybrid_agent(
+            env_1,
+            load_agent=MODELS / "dqn_obstacleavoidance",
+            save_name=MODELS / "dqn_obstacleavoidance_1",
+            M_exti=M_ext1,
+            timesteps=300000,
+        )
     else:
         agent_0 = DQN.load(Path("HyRL/models") / "dqn_obstacleavoidance_0")
         agent_1 = DQN.load(Path("HyRL/models") / "dqn_obstacleavoidance_1")
