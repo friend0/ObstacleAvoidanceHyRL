@@ -92,5 +92,5 @@ class ObstacleAvoidancePlanner:
     def control(self, state: State):
         action_hyb, switch = self.hybrid_agent.predict(state)
         env_hyb.state = state_hyb
-        _, reward_hyb, done, _ = env_hyb.step(action_hyb)
+        obs, reward, terminated, truncated, info = env_or.step(action_hyb)
         state_hyb = get_state_from_env_OA(env_hyb)
