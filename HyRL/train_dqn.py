@@ -56,7 +56,7 @@ env = VecVideoRecorder(
 if load:
     model = DQN.load(MODELS / "dqn_obstacleavoidance", env)
 else:
-    policy_kwargs = dict(activation_fn=th.nn.ReLU, net_arch=[256, 256, 128])
+    policy_kwargs = dict(activation_fn=th.nn.ReLU, net_arch=[64, 64])
     device = "mps" if th.backends.mps.is_available() else "cpu"
 
     model = DQN(
@@ -69,12 +69,12 @@ else:
         gamma=0.966,
         buffer_size=250_000,
         batch_size=256,
-        exploration_fraction=0.25,
-        exploration_final_eps=0.02,
+        exploration_fraction=0.20,
+        exploration_final_eps=0.05,
         train_freq=4,
         target_update_interval=500,
         tau=1.0,
-        learning_starts=50_000,
+        learning_starts=25_000,
         # optimize_memory_usage=True,
     )
 
