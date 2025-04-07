@@ -26,11 +26,11 @@
             [ pkgs.zsh pkgs.neovim pkgs.black pkgs.grpcurl pkgs.protobuf pkgs.texlive.combined.scheme-basic ]);
 
           shellHook = ''
-            echo "🔧 Setting up Python virtual environment with uv..."
+            echo "Setting up Python virtual environment with uv..."
 
             # Create venv if it doesn't exist
             if [ ! -d ".venv" ]; then
-              echo "📦 No .venv found, creating with uv..."
+              echo "No .venv found, creating with uv..."
               uv venv
             fi
 
@@ -42,6 +42,7 @@
             else
               echo "❌ Failed to activate venv: .venv/bin/activate not found"
             fi
+            # uv run pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/nightly/cpu
 
             if [ "$SHELL" != "$(command -v zsh)" ]; then
               export SHELL="$(command -v zsh)"
