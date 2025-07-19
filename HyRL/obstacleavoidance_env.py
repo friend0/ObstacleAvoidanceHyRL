@@ -49,6 +49,7 @@ class ObstacleAvoidance(gym.Env):
         bounds: BBox = BBox(x_min=0.0, x_max=3.0, y_min=-1.5, y_max=1.5),
         obstacle: Obstacle = Obstacle(center=Point(x=1.5, y=0.0), r=0.75),
         goal: Point = Point(x=3.0, y=0.0),
+        t_sampling=0.05,
         random_init=True,
         state_init=np.array([0.0, 0.0], dtype=np.float32),
         spread=np.array([0.5, 1.0], dtype=np.float32),
@@ -66,7 +67,7 @@ class ObstacleAvoidance(gym.Env):
         self.bounds = bounds
         self.obstacle = obstacle
         self.goal = goal
-        self.t_sampling = 0.05
+        self.t_sampling = t_sampling
 
         self.x_obst, self.y_obst = obstacle.center.x, obstacle.center.y
         self.radius_obst = obstacle.r

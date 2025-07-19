@@ -51,6 +51,11 @@ if __name__ == "__main__":
     M_ext0 = M_ext(M_0, X_0)
     M_ext1 = M_ext(M_1, X_1)
 
+    import pickle
+
+    # Pack your variables into a dictionary
+    np.savez("critical_points.npz", M_star=M_star)
+
     # visualizing the extended sets
     visualize_M_ext(M_ext0, figure_number=1)
     visualize_M_ext(M_ext1, figure_number=2)
@@ -92,9 +97,13 @@ if __name__ == "__main__":
         np.array([0.0, -0.055], dtype=np.float32),
         np.array([0.0, 0.15], dtype=np.float32),
         np.array([0.0, -0.15], dtype=np.float32),
+        np.array([0.0, 0.25], dtype=np.float32),
+        np.array([0.0, -0.25], dtype=np.float32),
     ]
     for q in range(2):
+        print(f"Simulating for q = {q}")
         for state_init in starting_conditions:
+            print(f"Starting condition: {state_init}")
             hybrid_agent = HyRL_agent(agent_0, agent_1, M_ext0, M_ext1, q_init=q)
             simulate_obstacleavoidance(
                 hybrid_agent, model, state_init, figure_number=3 + q

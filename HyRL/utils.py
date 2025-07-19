@@ -381,8 +381,12 @@ def simulate_obstacleavoidance(
     figure_number=3,
     show_switches=False,
 ):
-    env_or = ObstacleAvoidance(state_init=state_init, random_init=False)
-    env_hyb = ObstacleAvoidance(state_init=state_init, random_init=False)
+    env_or = ObstacleAvoidance(
+        steps=60, t_sampling=0.05, state_init=state_init, random_init=False
+    )
+    env_hyb = ObstacleAvoidance(
+        steps=60, t_sampling=0.05, state_init=state_init, random_init=False
+    )
     done = False
     state_or, state_hyb = state_init, state_init
     states_or, states_hyb = [state_or], [state_hyb]
@@ -422,61 +426,62 @@ def simulate_obstacleavoidance(
 
         sign *= -1
 
-    plt.figure(figure_number)
-    plt.plot(
-        np.array(states_hyb)[:, 0], np.array(states_hyb)[:, 1], "blue", linewidth=3
-    )
-    plt.plot(
-        np.array(states_or)[:, 0],
-        np.array(states_or)[:, 1],
-        "red",
-        linestyle="--",
-        linewidth=3,
-    )
-    plt.plot(
-        np.array(states_or)[0, 0],
-        np.array(states_or)[0, 1],
-        "o",
-        color="red",
-        markersize=15,
-        fillstyle="none",
-    )
-    plt.plot(
-        np.array(states_or)[-1, 0],
-        np.array(states_or)[-1, 1],
-        "x",
-        color="red",
-        markersize=22,
-        fillstyle="none",
-    )
-    plt.plot(
-        np.array(states_hyb)[-1, 0],
-        np.array(states_hyb)[-1, 1],
-        "x",
-        color="blue",
-        markersize=22,
-        fillstyle="none",
-    )
-    if show_switches:
-        plt.plot(
-            np.array(switch)[:, 0],
-            np.array(switches)[:, 1],
-            "x",
-            markersize=15,
-            color="black",
-            linewidth=2,
-            fillstyle="none",
-        )
-    obstacle = matplotlib.patches.Circle((1.5, 0.0), radius=0.75, color="gray")
-    plt.gca().add_patch(obstacle)
-    # plt.text(1.42, -0.1, '$\mathcal{O}$', fontsize=22)
-    plt.grid(visible=True)
-    plt.xticks(np.linspace(0, 3, num=7, endpoint=True), fontsize=18)
-    plt.yticks(np.linspace(-1.5, 1.5, num=7, endpoint=True), fontsize=18)
-    plt.xlabel("$x$", fontsize=22)
-    plt.ylabel("$y$", fontsize=22)
-    plt.tight_layout()
+    # plt.figure(figure_number)
+    # plt.plot(
+    #     np.array(states_hyb)[:, 0], np.array(states_hyb)[:, 1], "blue", linewidth=3
+    # )
+    # plt.plot(
+    #     np.array(states_or)[:, 0],
+    #     np.array(states_or)[:, 1],
+    #     "red",
+    #     linestyle="--",
+    #     linewidth=3,
+    # )
+    # plt.plot(
+    #     np.array(states_or)[0, 0],
+    #     np.array(states_or)[0, 1],
+    #     "o",
+    #     color="red",
+    #     markersize=15,
+    #     fillstyle="none",
+    # )
+    # plt.plot(
+    #     np.array(states_or)[-1, 0],
+    #     np.array(states_or)[-1, 1],
+    #     "x",
+    #     color="red",
+    #     markersize=22,
+    #     fillstyle="none",
+    # )
+    # plt.plot(
+    #     np.array(states_hyb)[-1, 0],
+    #     np.array(states_hyb)[-1, 1],
+    #     "x",
+    #     color="blue",
+    #     markersize=22,
+    #     fillstyle="none",
+    # )
+    # if show_switches:
+    #     plt.plot(
+    #         np.array(switch)[:, 0],
+    #         np.array(switches)[:, 1],
+    #         "x",
+    #         markersize=15,
+    #         color="black",
+    #         linewidth=2,
+    #         fillstyle="none",
+    #     )
+    # obstacle = matplotlib.patches.Circle((1.5, 0.0), radius=0.75, color="gray")
+    # plt.gca().add_patch(obstacle)
+    # # plt.text(1.42, -0.1, '$\mathcal{O}$', fontsize=22)
+    # plt.grid(visible=True)
+    # plt.xticks(np.linspace(0, 3, num=7, endpoint=True), fontsize=18)
+    # plt.yticks(np.linspace(-1.5, 1.5, num=7, endpoint=True), fontsize=18)
+    # plt.xlabel("$x$", fontsize=22)
+    # plt.ylabel("$y$", fontsize=22)
+    # plt.tight_layout()
     print("reward original", score_or, " reward hybrid", score_hyb)
+    return states_or, states_hyb, switch
 
 
 def visualize_M_ext(M_ext, figure_number, resolution=50):

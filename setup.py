@@ -15,6 +15,9 @@ setup(
     #     # of the HyRL package.
     #     "HyRL": ["models/*"],
     # },
+    package_data={
+    "rl_policy.models": ["*"],        # or ["**/*"] for recursive
+    },
     install_requires=[
         "gym",
         "torch",
