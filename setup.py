@@ -10,13 +10,10 @@ setup(
     url="https://github.com/HSL-UCSC/ObstacleAvoidanceHyRL",
     # Automatically find packages, but exclude 'examples' and 'tests' directories.
     packages=find_packages(exclude=["examples", "tests"]),
-    # package_data={
-    #     # This tells setuptools to include all files under the "models" subdirectory
-    #     # of the HyRL package.
-    #     "HyRL": ["models/*"],
-    # },
     package_data={
-    "rl_policy.models": ["*"],        # or ["**/*"] for recursive
+        # This tells setuptools to include all files under the "models" subdirectory
+        # of the HyRL package.
+        "HyRL": ["models/*"],
     },
     install_requires=[
         "gym",
