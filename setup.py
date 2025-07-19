@@ -1,4 +1,6 @@
 from setuptools import setup, find_packages
+import io
+import os
 
 setup(
     name="HyRL",
@@ -8,12 +10,12 @@ setup(
     long_description_content_type="text/markdown",
     author="HSL-UCSC",
     url="https://github.com/HSL-UCSC/ObstacleAvoidanceHyRL",
+    # Automatically find packages, but exclude 'examples' and 'tests' directories.
     packages=find_packages(where="src", exclude=["tests*", "examples*"]),
     include_package_data=True,
     package_data={
         # key = the package name (folder under src/).
         # Here 'models' means src/models
-        "dqn_models": ["*"],  # or ["**/*"] for recursive
         "models": ["*"],  # all files in models/
     },
     # package_data={
