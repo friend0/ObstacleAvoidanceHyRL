@@ -75,14 +75,14 @@ if __name__ == "__main__":
             agent_0 = train_hybrid_agent(
                 env_0,
                 load_agent="dqn_obstacleavoidance",
-                save_name=f"dqn_obstacleavoidance_0_{radius*100}",
+                save_name=f"dqn_obstacleavoidance_0_{radius * 100}",
                 M_exti=M_ext0,
                 timesteps=300000,
             )
             agent_1 = train_hybrid_agent(
                 env_1,
                 load_agent="dqn_obstacleavoidance",
-                save_name=f"dqn_obstacleavoidance_1_{radius*100}",
+                save_name=f"dqn_obstacleavoidance_1_{radius * 100}",
                 M_exti=M_ext1,
                 timesteps=300000,
             )
@@ -108,5 +108,5 @@ if __name__ == "__main__":
             simulate_obstacleavoidance(
                 hybrid_agent, model, state_init, figure_number=3 + q
             )
-        save_name = "OA_HyRLDQN_Sim_q" + str(q) + ".svg"
-        plt.savefig(save_name, format="svg")
+        save_name = "OA_HyRLDQN_Sim_q" + str(q) + ".png"
+        plt.savefig(save_name, format="png")
