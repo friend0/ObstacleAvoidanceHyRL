@@ -7,34 +7,13 @@ from stable_baselines3.common.callbacks import (
     EvalCallback,
     StopTrainingOnRewardThreshold,
 )
-
-from stable_baselines3.common.vec_env import VecVideoRecorder
 from stable_baselines3.common import results_plotter
-from stable_baselines3.common.vec_env import DummyVecEnv, VecNormalize
-from gymnasium.wrappers import RecordEpisodeStatistics
+from stable_baselines3.common.monitor import Monitor
 from stable_baselines3.common.results_plotter import plot_results
-from pathlib import Path
-import numpy as np
 
-
-# Hook into callback to store episode rewards
-class RewardTrackerCallback(EvalCallback):
-    def __init__(self, eval_env, **kwargs):
-        super().__init__(eval_env, **kwargs)
-        self.episode_rewards = []
-
-    def _on_step(self) -> bool:
-        if len(self.locals["infos"]) > 0:
-            info = self.locals["infos"][0]
-            if "episode" in info:
-                self.episode_rewards.append(info["episode"]["r"])
-        return True
-
-
-MODELS = Path("HyRL/models")
-load = False
-train = True
-save = True
+load = True
+train = False
+save = False
 
 # Create log dir
 log_dir = "tmp/hyrl"
@@ -56,8 +35,16 @@ env = VecVideoRecorder(
 if load:
     model = DQN.load(MODELS / "dqn_obstacleavoidance", env)
 else:
+    # building the model
     policy_kwargs = dict(activation_fn=th.nn.ReLU, net_arch=[64, 64])
-    device = "mps" if th.backends.mps.is_available() else "cpu"
+    model = DQN(
+        "MlpPolicy",
+        env,
+        policy_kwargs=policy_kwargs,
+        verbose=1,
+        learning_rate=0.0001946,
+        gamma=0.9664,
+    )
 
     model = DQN(
         "MlpPolicy",
@@ -82,32 +69,18 @@ else:
 # timesteps = 3_000_000
 timesteps = 1_000_000
 if train:
-    eval_env = DummyVecEnv([lambda: RecordEpisodeStatistics(ObstacleAvoidance())])
-    eval_env = VecNormalize(eval_env, norm_obs=True, norm_reward=True, training=False)
+    # Separate evaluation env
+    eval_env = ObstacleAvoidance()
 
+    # Stop training when the model reaches the reward threshold
     callback_on_best = StopTrainingOnRewardThreshold(reward_threshold=96, verbose=1)
-    eval_callback = RewardTrackerCallback(
-        eval_env,
-        callback_on_new_best=callback_on_best,
-        verbose=1,
+    eval_callback = EvalCallback(
+        eval_env, callback_on_new_best=callback_on_best, verbose=1
     )
-
+    timesteps = 1000000
     model.learn(total_timesteps=timesteps, callback=eval_callback)
-
     if save:
-        model.save(MODELS / "dqn_obstacleavoidance")
-
-    window = 100
-    smoothed = np.convolve(
-        eval_callback.episode_rewards, np.ones(window) / window, mode="valid"
-    )
-
-    plt.plot(smoothed)
-    plt.xlabel("Episodes")
-    plt.ylabel("Total Reward")
-    plt.title("Training Reward Curve")
-    plt.grid(True)
-    plt.show()
+        model.save("dqn_obstacleavoidance")
 
 plot_results(
     [log_dir], timesteps, results_plotter.X_TIMESTEPS, "DQN Obstacle Avoidance"

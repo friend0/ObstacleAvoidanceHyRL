@@ -53,6 +53,11 @@ if __name__ == "__main__":
     M_ext0 = M_ext(M_0, X_0)
     M_ext1 = M_ext(M_1, X_1)
 
+    import pickle
+
+    # Pack your variables into a dictionary
+    np.savez("critical_points.npz", M_star=M_star)
+
     # visualizing the extended sets
     visualize_M_ext(M_ext0, figure_number=1)
     visualize_M_ext(M_ext1, figure_number=2)
@@ -68,20 +73,21 @@ if __name__ == "__main__":
     # training the new agents
     training2 = True
     if training2:
-        agent_0 = train_hybrid_agent(
-            env_0,
-            load_agent=MODELS / "dqn_obstacleavoidance",
-            save_name=MODELS / "dqn_obstacleavoidance_0",
-            M_exti=M_ext0,
-            timesteps=300000,
-        )
-        agent_1 = train_hybrid_agent(
-            env_1,
-            load_agent=MODELS / "dqn_obstacleavoidance",
-            save_name=MODELS / "dqn_obstacleavoidance_1",
-            M_exti=M_ext1,
-            timesteps=300000,
-        )
+        for radius in [0.25, 0.50]:
+            agent_0 = train_hybrid_agent(
+                env_0,
+                load_agent="dqn_obstacleavoidance",
+                save_name=f"dqn_obstacleavoidance_0_{radius * 100}",
+                M_exti=M_ext0,
+                timesteps=300000,
+            )
+            agent_1 = train_hybrid_agent(
+                env_1,
+                load_agent="dqn_obstacleavoidance",
+                save_name=f"dqn_obstacleavoidance_1_{radius * 100}",
+                M_exti=M_ext1,
+                timesteps=300000,
+            )
     else:
         agent_0 = DQN.load(Path("HyRL/models") / "dqn_obstacleavoidance_0")
         agent_1 = DQN.load(Path("HyRL/models") / "dqn_obstacleavoidance_1")
@@ -93,12 +99,16 @@ if __name__ == "__main__":
         np.array([0.0, -0.055], dtype=np.float32),
         np.array([0.0, 0.15], dtype=np.float32),
         np.array([0.0, -0.15], dtype=np.float32),
+        np.array([0.0, 0.25], dtype=np.float32),
+        np.array([0.0, -0.25], dtype=np.float32),
     ]
     for q in range(2):
+        print(f"Simulating for q = {q}")
         for state_init in starting_conditions:
+            print(f"Starting condition: {state_init}")
             hybrid_agent = HyRL_agent(agent_0, agent_1, M_ext0, M_ext1, q_init=q)
             simulate_obstacleavoidance(
                 hybrid_agent, model, state_init, figure_number=3 + q
             )
-        save_name = "OA_HyRLDQN_Sim_q" + str(q) + ".svg"
-        plt.savefig(save_name, format="svg")
+        save_name = "OA_HyRLDQN_Sim_q" + str(q) + ".png"
+        plt.savefig(save_name, format="png")
