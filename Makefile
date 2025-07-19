@@ -15,7 +15,6 @@ BETTERPROTO_OUT = $(OUT_DIR)/hyrl_api
 
 
 run:
-	PYTHONPATH=$PWD/src:$PYTHONPATH
 	uv run python -m rl_policy.server
 
 test_getDirectionField:
