@@ -1,0 +1,65 @@
+syntax = "proto3";
+
+
+package hyrl;
+
+service ObstacleAvoidanceService {
+  rpc GetDirection(DirectionRequest) returns (DirectionResponse);
+  rpc GetTrajectory(TrajectoryRequest) returns (TrajectoryResponse);
+}
+
+// define drone state
+message DroneState {
+  float x = 1;
+  float y = 2;
+  float z = 3;
+}
+
+enum ModelType {
+  STANDARD = 0;
+  HYBRID = 1;
+}
+
+message TrajectoryRequest{
+  DroneState state = 1;
+  DroneState target_state = 2;
+  uint32 duration_s = 3;
+  float sampling_time = 4;
+  ModelType model_type = 5;
+  int32 num_waypoints = 6;
+  bool noise = 7;
+}
+
+
+message TrajectoryResponse {
+  repeated DroneState trajectory = 1;
+}
+
+// DEFINE DIRECTION REQUEST
+message DirectionRequest {
+  DroneState state = 1;
+  ModelType model_type = 2;
+}
+
+// DEFINE DIRECTION RESPONSE
+message DirectionResponse {
+  oneof control_type {
+    DiscreteHeading discrete_heading = 2;
+    ContinuousHeading continuous_heading = 3;
+  }
+}
+
+message DiscreteHeading { 
+  HeadingDirection direction = 1;
+}
+
+enum HeadingDirection {
+  RESERVED = 0;
+  STRAIGHT = 1;
+  LEFT = 2;
+  HARD_LEFT = 3;
+  RIGHT = 4;
+  HARD_RIGHT = 5;
+}
+
+message ContinuousHeading { float rad = 1; }
