@@ -1,27 +1,43 @@
 .PHONY: protos
 
-# Path to your .proto file(s)
+# PYTHONPATH=$PWD:$PYTHONPATH python -m rl_policy.server
+PYTHONPATH=$PWD/src:$PYTHONPATH
+
+# Path to .proto file(s)
 PROTO_DIR = ./protos
 PROTO_FILES = $(wildcard $(PROTO_DIR)/*.proto)
 
 # Output directories
-OUT_DIR = HyRLServer/
+OUT_DIR = ./src
 PYTHON_OUT = $(OUT_DIR)
 GRPCLIB_OUT = $(OUT_DIR)
-BETTERPROTO_OUT = $(OUT_DIR)
+BETTERPROTO_OUT = $(OUT_DIR)/hyrl_api
+
 
 run:
-	python server.py
+	PYTHONPATH=$PWD/src:$PYTHONPATH
+	uv run python -m rl_policy.server
+
+test_getDirectionField:
+	python -m rl_policy.getDirectionField
+
+test_getDirectionPath:
+	python -m rl_policy.getDirectionPath
+
+test_getTrajectory:
+	python -m rl_policy.getTrajectorySim
 
 # Command to generate all Python files from .proto
 protos:
-	uv run python -m grpc_tools.protoc \
-		-I$(PROTO_DIR) \
-		--python_out=$(PYTHON_OUT) \
-		--grpclib_python_out=$(GRPCLIB_OUT) \
+	mkdir -p $(OUT_DIR)/hyrl_api
+	python -m grpc_tools.protoc \
+	  -I$(PROTO_DIR) \
+	  --python_out=$(OUT_DIR) \
+	  --grpclib_python_out=$(OUT_DIR) \
 		--python_betterproto_out=$(BETTERPROTO_OUT) \
-		$(PROTO_FILES)
+		--mypy_out=$(OUT_DIR) \
+	  $(PROTO_DIR)/hyrl_api/obstacle_avoidance.proto
 
 # Clean generated files (optional)
 clean:
-	rm -f $(OUT_DIR)/*.py
+	rm -f $(OUT_DIR)/drone_pb2.py $(OUT_DIR)/drone_grpc.py
