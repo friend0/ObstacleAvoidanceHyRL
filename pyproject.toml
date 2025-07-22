@@ -32,10 +32,10 @@ dependencies = [
 
 [tool.setuptools]
 package-dir = { "" = "src" }
-packages = ["rl_policy", "hyrl_api"]
+# packages = ["HyRL", "rl_policy", "hyrl_api"]
 
 [tool.setuptools.package-data]
-"HyRL" = ["models/*"]
+"HyRL" = ["models/*.zip"]
 
 [dependency-groups]
 dev = ["matplotlib", "setuptools"]

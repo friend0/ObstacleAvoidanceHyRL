@@ -40,6 +40,7 @@ from HyRL.utils import (
 from pathlib import Path
 
 from importlib.resources import path
+from importlib.resources import files
 import importlib.resources as pkg_resources
 
 
@@ -52,25 +53,18 @@ class ObstacleAvoidanceModels:
 
 def initialize_hybrid_models():
     # Load pre-trained models
-    with path("HyRL", "models", "dqn_obstacleavoidance") as model_dir:
-        model_path = Path(model_dir)
-        print(f"Loading main model from {model_path}")
-        model = DQN.load(str(model_path))
+    main_model_path = files("HyRL.models").joinpath("dqn_obstacleavoidance.zip")
+    agent0_path = files("HyRL.models").joinpath("dqn_obstacleavoidance_0.zip")
+    agent1_path = files("HyRL.models").joinpath("dqn_obstacleavoidance_1.zip")
 
-    with path("HyRL", "models", "dqn_obstacleavoidance_0") as a0_dir:
-        a0_path = Path(a0_dir)
-        print(f"Loading agent_0 from {a0_path}")
-        agent_0 = DQN.load(str(a0_path))
-
-    with path("HyRL", "models", "dqn_obstacleavoidance_1") as a1_dir:
-        a1_path = Path(a1_dir)
-        print(f"Loading agent_1 from {a1_path}")
-        agent_1 = DQN.load(str(a1_path))
+    model = DQN.load(str(main_model_path))
+    agent_0 = DQN.load(str(agent0_path))
+    agent_1 = DQN.load(str(agent1_path))
 
     print("✅ Successfully loaded pre-trained models")
 
     # Loading in the trained agent
-    model = DQN.load(Path("HyRL/models") / "dqn_obstacleavoidance")
+    # model = DQN.load(Path("HyRL/models") / "dqn_obstacleavoidance")
     bounds = BBox(x_min=0.0, x_max=3.0, y_min=-1.5, y_max=1.5)
     obstacle = Obstacle(center=Point(x=1.5, y=0.0), r=0.75)
     goal = Point(x=3.0, y=0.0)
@@ -247,6 +241,7 @@ class DroneService(obstacle_avoidance_grpc.ObstacleAvoidanceServiceBase):
         #         states.append([state[0], state[1], z_start])
         #     sign *= -1
 
+        print(f"Switches {switch} ")
         total_states = len(hy)
         states = smooth_path(hy, request.num_waypoints)
         print(

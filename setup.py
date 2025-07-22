@@ -12,11 +12,12 @@ setup(
     url="https://github.com/HSL-UCSC/ObstacleAvoidanceHyRL",
     # Automatically find packages, but exclude 'examples' and 'tests' directories.
     packages=find_packages(where="src", exclude=["tests*", "examples*"]),
+    package_dir={"": "src"},
     include_package_data=True,
     package_data={
         # key = the package name (folder under src/).
         # Here 'models' means src/models
-        "models": ["*"],  # all files in models/
+        "HyRL": ["models/*.zip"],  # all files in models/
     },
     # package_data={
     #     # This tells setuptools to include all files under the "models" subdirectory

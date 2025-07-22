@@ -20,7 +20,7 @@ from pathlib import Path
 
 if __name__ == "__main__":
     # Loading in the trained agent
-    model = DQN.load(Path("HyRL/models") / "dqn_obstacleavoidance")
+    model = DQN.load(Path("src/HyRL/models") / "dqn_obstacleavoidance")
     bounds = BBox(x_min=0.0, x_max=3.0, y_min=-1.5, y_max=1.5)
     obstacle = Obstacle(center=Point(x=1.5, y=0.0), r=0.75)
     goal = Point(x=3.0, y=0.0)
@@ -54,9 +54,10 @@ if __name__ == "__main__":
     import pickle
 
     # Pack your variables into a dictionary
-    np.savez("critical_points.npz", M_star=M_star)
+    # np.savez("critical_points.npz", M_star=M_star)
 
     # visualizing the extended sets
+    print("Visualizing the extended sets...")
     visualize_M_ext(M_ext0, figure_number=1)
     visualize_M_ext(M_ext1, figure_number=2)
 
@@ -87,8 +88,8 @@ if __name__ == "__main__":
                 timesteps=300000,
             )
     else:
-        agent_0 = DQN.load(Path("HyRL/models") / "dqn_obstacleavoidance_0")
-        agent_1 = DQN.load(Path("HyRL/models") / "dqn_obstacleavoidance_1")
+        agent_0 = DQN.load(Path("src/HyRL/models") / "dqn_obstacleavoidance_0")
+        agent_1 = DQN.load(Path("src/HyRL/models") / "dqn_obstacleavoidance_1")
 
     # simulation the hybrid agent compared to the original agent
     starting_conditions = [
