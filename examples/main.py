@@ -33,6 +33,7 @@ if __name__ == "__main__":
         obstacle,
         goal,
         model,
+        # steps=10,
         environent=ObstacleAvoidance,
         custom_state_to_observation=state_to_observation(obstacle, goal),
         get_state_from_env=get_state_from_env_OA,
@@ -94,20 +95,21 @@ if __name__ == "__main__":
     # simulation the hybrid agent compared to the original agent
     starting_conditions = [
         np.array([0.0, 0.0], dtype=np.float32),
-        np.array([0.0, 0.055], dtype=np.float32),
-        np.array([0.0, -0.055], dtype=np.float32),
-        np.array([0.0, 0.15], dtype=np.float32),
-        np.array([0.0, -0.15], dtype=np.float32),
+        # np.array([0.0, 0.055], dtype=np.float32),
+        # np.array([0.0, -0.055], dtype=np.float32),
+        # np.array([0.0, 0.15], dtype=np.float32),
+        # np.array([0.0, -0.15], dtype=np.float32),
         np.array([0.0, 0.25], dtype=np.float32),
         np.array([0.0, -0.25], dtype=np.float32),
     ]
     for q in range(2):
-        print(f"Simulating for q = {q}")
+        print(f"========== Simulating for q = {q} ==========")
         for state_init in starting_conditions:
-            print(f"Starting condition: {state_init}")
+            print(f"Initial condition: {state_init}")
             hybrid_agent = HyRL_agent(agent_0, agent_1, M_ext0, M_ext1, q_init=q)
             simulate_obstacleavoidance(
-                hybrid_agent, model, state_init, figure_number=3 + q
+                hybrid_agent, model, state_init, noise_mag=.15,figure_number=3 + q
             )
-        save_name = "OA_HyRLDQN_Sim_q" + str(q) + ".png"
-        plt.savefig(save_name, format="png")
+            print()
+        save_name = f"OA_HyRLDQN_Sim_q{}_25" + ".pdf"
+        plt.savefig(save_name, format="pdf")
