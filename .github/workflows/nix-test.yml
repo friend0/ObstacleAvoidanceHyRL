@@ -1,0 +1,90 @@
+name: Nix Development Environment Test
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  nix-smoke-test:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Install Nix
+      uses: cachix/install-nix-action@v27
+      with:
+        github_access_token: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Set up Cachix
+      uses: cachix/cachix-action@v15
+      with:
+        name: nix-community
+        authToken: '${{ secrets.CACHIX_AUTH_TOKEN }}'
+
+    - name: Check Nix flake
+      run: nix flake check
+
+    - name: Test development environment setup
+      run: |
+        nix develop --command bash -c "
+          echo 'Testing development environment...'
+          python --version
+          uv --version
+          echo 'PYTHONPATH: $PYTHONPATH'
+          
+          echo 'Installing dependencies...'
+          uv pip install -e .
+          
+          echo 'Listing installed packages...'
+          uv pip list
+        "
+
+    - name: Test server startup (smoke test)
+      run: |
+        nix develop --command bash -c "
+          echo 'Starting server smoke test...'
+          
+          # Start server in background and capture PID
+          timeout 30s python -m rl_policy.server &
+          SERVER_PID=\$!
+          
+          echo 'Server started with PID: '\$SERVER_PID
+          
+          # Wait a moment for server to initialize
+          sleep 10
+          
+          # Test if server is responding (basic connection test)
+          if grpcurl -plaintext localhost:50051 list; then
+            echo 'Server is responding to gRPC requests'
+          else
+            echo 'Server is not responding properly'
+            exit 1
+          fi
+          
+          # Clean shutdown
+          kill \$SERVER_PID 2>/dev/null || true
+          wait \$SERVER_PID 2>/dev/null || true
+          
+          echo 'Smoke test completed successfully!'
+        "
+
+    - name: Test protobuf generation
+      run: |
+        nix develop --command bash -c "
+          echo 'Testing protobuf generation...'
+          make protos
+          
+          echo 'Checking generated files...'
+          ls -la src/hyrl_api/
+          
+          if [ -f 'src/hyrl_api/obstacle_avoidance_pb2.py' ]; then
+            echo 'Protobuf files generated successfully'
+          else
+            echo 'Protobuf files missing'
+            exit 1
+          fi
+        "
