@@ -15,18 +15,16 @@ ENV PATH="/root/.local/bin:$PATH"
 RUN useradd -m -d /app hyrl-user
 WORKDIR /app
 
-# Copy dependency files first for better layer caching
-COPY pyproject.toml ./
+# Copy all necessary files for build
+COPY pyproject.toml README.md ./
+COPY src/ ./src/
+COPY Makefile ./
+COPY protos/ ./protos/
 
 # Install dependencies (uv will use CPU-only PyTorch from tool.uv.sources)
 RUN uv sync && \
     # Clean up cache to reduce image size
     uv cache clean
-
-# Copy source code
-COPY --chown=hyrl-user:hyrl-user src/ ./src/
-COPY --chown=hyrl-user:hyrl-user Makefile ./
-COPY --chown=hyrl-user:hyrl-user protos/ ./protos/
 
 # Fix ownership of .venv
 RUN chown -R hyrl-user:hyrl-user /app
