@@ -5,7 +5,7 @@ Script to fix model compatibility warnings by re-saving models with current SB3 
 from pathlib import Path
 from stable_baselines3 import DQN
 
-models_dir = Path("src/HyRL/models")
+models_dir = Path("src/hyrl/models")
 model_files = [
     "dqn_obstacleavoidance",
     "dqn_obstacleavoidance_0", 

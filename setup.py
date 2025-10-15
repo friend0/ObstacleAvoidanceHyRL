@@ -3,7 +3,7 @@ import io
 import os
 
 setup(
-    name="HyRL",
+    name="hyrl",
     version="1.0.0",
     description="Hybrid Reinforcement Learning for Obstacle Avoidance",
     long_description=open("README.md", "r", encoding="utf-8").read(),
@@ -15,15 +15,8 @@ setup(
     package_dir={"": "src"},
     include_package_data=True,
     package_data={
-        # key = the package name (folder under src/).
-        # Here 'models' means src/models
-        "HyRL": ["models/*.zip"],  # all files in models/
+        "hyrl": ["models/*.zip"],  # all files in models/
     },
-    # package_data={
-    #     # This tells setuptools to include all files under the "models" subdirectory
-    #     # of the HyRL package.
-    #     "HyRL": ["models/*"],
-    # },
     install_requires=[
         "gym",
         "torch",
