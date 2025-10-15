@@ -16,7 +16,6 @@ dependencies = [
   "grpcio>=1.71.0",
   "grpclib>=0.4.7",
   "protobuf>=5.29.4",
-  "jinja2>=3.1.0",
   "matplotlib>=3.7.0",
   "python-dotenv>=0.9.9",
 ]
@@ -30,14 +29,13 @@ build-backend = "setuptools.build_meta"
 
 [tool.setuptools]
 package-dir = { "" = "src" }
-# packages = ["hyrl", "rl_policy", "hyrl_api"]
+packages = ["hyrl", "rl_policy", "hyrl_api"]
 
 [tool.setuptools.package-data]
 "hyrl" = ["models/*.zip"]
 
 [tool.uv]
 package = true
-extra-index-url = ["https://download.pytorch.org/whl/cpu"]
 
 [dependency-groups]
 dev = ["matplotlib", "setuptools"]

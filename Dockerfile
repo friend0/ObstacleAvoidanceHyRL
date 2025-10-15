@@ -21,8 +21,8 @@ COPY src/ ./src/
 COPY Makefile ./
 COPY protos/ ./protos/
 
-# Install dependencies (uv will use CPU-only PyTorch from tool.uv.sources)
-RUN uv sync && \
+# Install dependencies with CPU-only PyTorch
+RUN uv sync --extra-index-url https://download.pytorch.org/whl/cpu && \
     # Clean up cache to reduce image size
     uv cache clean
 
