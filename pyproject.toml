@@ -27,9 +27,8 @@ hyrl-server = "rl_policy.server:main"
 requires = ["setuptools>=61.0", "wheel"]
 build-backend = "setuptools.build_meta"
 
-[tool.setuptools]
-package-dir = { "" = "src" }
-packages = ["hyrl", "rl_policy", "hyrl_api"]
+[tool.setuptools.packages.find]
+where = ["src"]
 
 [tool.setuptools.package-data]
 "hyrl" = ["models/*.zip"]
