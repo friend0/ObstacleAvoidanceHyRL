@@ -354,7 +354,7 @@ requires-dist = [
     { name = "protobuf", specifier = ">=5.29.4" },
     { name = "scikit-learn" },
     { name = "shimmy" },
-    { name = "stable-baselines3" },
+    { name = "stable-baselines3", specifier = ">=2.2.0" },
     { name = "torch" },
 ]
 

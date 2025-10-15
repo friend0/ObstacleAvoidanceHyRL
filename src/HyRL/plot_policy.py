@@ -3,7 +3,10 @@ import matplotlib
 import matplotlib.pyplot as plt
 from matplotlib.colors import BoundaryNorm
 from matplotlib.ticker import MaxNLocator
+from matplotlib.colors import ListedColormap, BoundaryNorm
+from scipy.ndimage import median_filter
 from stable_baselines3 import DQN
+from stable_baselines3.common.vec_env import DummyVecEnv, VecNormalize
 from obstacleavoidance_env import ObstacleAvoidance
 from importlib.resources import path
 from importlib.resources import files
@@ -30,6 +33,8 @@ def plot_policy(model, resolution=150, figure_number=1):
     for idy in range(resolution):
         for idx in range(resolution):
             obs = compute_observation(x_[idx], y_[idy])
+            if isinstance(norm_env, VecNormalize):
+                obs = norm_env.normalize_obs(obs)
             action, _ = model.predict(obs, deterministic=True)
             actions[idy, idx] = (action - 2) / 2
     x, y = np.meshgrid(x_, y_)

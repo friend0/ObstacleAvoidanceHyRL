@@ -1,7 +1,7 @@
 .PHONY: protos
 
 # PYTHONPATH=$PWD:$PYTHONPATH python -m rl_policy.server
-PYTHONPATH=$PWD/src:$PYTHONPATH
+# PYTHONPATH=$PWD/src:$PYTHONPATH
 
 # Path to .proto file(s)
 PROTO_DIR = ./protos

@@ -3,6 +3,10 @@ from gymnasium import spaces
 from gymnasium.utils import seeding
 import numpy as np
 from dataclasses import dataclass
+from gymnasium.utils import seeding
+import matplotlib.pyplot as plt
+from matplotlib.backends.backend_agg import FigureCanvasAgg
+import io
 
 
 @dataclass
@@ -11,12 +15,7 @@ class State:
     y: float
 
     def __getitem__(self, index: int) -> float:
-        if index == 0:
-            return self.x
-        elif index == 1:
-            return self.y
-        else:
-            raise IndexError("State supports indices 0 and 1 only.")
+        return (self.x, self.y)[index]
 
     def __len__(self) -> int:
         return 2
@@ -45,7 +44,7 @@ class Obstacle:
 class ObstacleAvoidance(gym.Env):
     def __init__(
         self,
-        steps=60,
+        steps=120,
         bounds: BBox = BBox(x_min=0.0, x_max=3.0, y_min=-1.5, y_max=1.5),
         obstacle: Obstacle = Obstacle(center=Point(x=1.5, y=0.0), r=0.75),
         goal: Point = Point(x=3.0, y=0.0),
@@ -56,6 +55,7 @@ class ObstacleAvoidance(gym.Env):
         backwards=False,
         hybridlearning=False,
         M_ext=None,
+        render_mode=None,
     ):
         self.steps = steps
         self.random_init = random_init
@@ -73,38 +73,20 @@ class ObstacleAvoidance(gym.Env):
         self.radius_obst = obstacle.r
         self.x_goal, self.y_goal = goal.x, goal.y
 
-        corners = np.array(
-            [
-                [bounds.x_min, bounds.y_min],
-                [bounds.x_min, bounds.y_max],
-                [bounds.x_max, bounds.y_min],
-                [bounds.x_max, bounds.y_max],
-            ],
-            dtype=np.float32,
-        )
-        max_obst_dist = (
-            np.max(
-                np.linalg.norm(
-                    corners - np.array([self.x_obst, self.y_obst], dtype=np.float32),
-                    axis=1,
-                )
-            )
-            - self.radius_obst
-        )
-        max_goal_dist = np.max(
-            np.linalg.norm(
-                corners - np.array([self.x_goal, self.y_goal], dtype=np.float32), axis=1
-            )
-        )
-
         self.low_state = np.array([0.0, 0.0, bounds.y_min], dtype=np.float32)
-        self.high_state = np.array(
-            [max_obst_dist, max_goal_dist, bounds.y_max], dtype=np.float32
-        )
+        self.high_state = np.array([3, 4.5, bounds.y_max], dtype=np.float32)
         self.action_space = spaces.Discrete(5)
         self.observation_space = spaces.Box(
-            low=self.low_state, high=self.high_state, shape=(3,), dtype=np.float32
+            low=self.low_state, high=self.high_state, dtype=np.float32
         )
+        self._action_to_direction = {
+            0: np.array([1, 1]),  # left
+            1: np.array([1, 0.5]),  # slight left
+            2: np.array([1, 0]),  # stright
+            3: np.array([1, -0.5]),  # slight right
+            4: np.array([1, -1]),  # right
+        }
+        self.np_random = None
         self.seed()
         self.reset()
 
@@ -113,69 +95,137 @@ class ObstacleAvoidance(gym.Env):
         return [seed]
 
     def update_observation(self):
-        # Compute the distance to the obstacle (clamped to zero if negative)
         dist_obst = max(
             np.sqrt((self.x - self.x_obst) ** 2 + (self.y - self.y_obst) ** 2)
             - self.radius_obst,
             0.0,
         )
-        # Compute the distance to the goal.
         dist_goal = np.sqrt((self.x - self.x_goal) ** 2 + (self.y - self.y_goal) ** 2)
         self.state = np.array([dist_obst, dist_goal, self.y], dtype=np.float32)
 
     def check_terminate(self):
         self.terminate = (
-            self.state[0] <= 1e-3
+            self.state[0] <= 65e-3
             or abs(self.y) >= self.bounds.y_max
             or self.x > self.bounds.x_max
         )
 
     def step(self, action):
-        force = (action - 2) / 2
+        dx, dy = self._action_to_direction[int(action)]
         sign = 1 if not self.backwards else -1
 
         if self.hybridlearning:
             if not self.M_ext.in_M_ext(np.array([self.x, self.y], dtype=np.float32)):
                 sign = 0
 
-        self.x += sign * self.t_sampling
-        self.y += sign * force * self.t_sampling
+        # Apply motion
+        self.x += sign * dx * self.t_sampling
+        self.y += sign * dy * self.t_sampling
 
+        # Update state
         self.update_observation()
 
-        barrier = (self.state[0] - 2 * self.radius_obst) ** 2 - np.log(
-            max(self.state[0], 1e-6)
-        )
-        reward = max(0, -self.state[1] - 0.1 * barrier + 3.5)
+        # --- Reward Components ---
+        x_error = abs(self.x_goal - self.x)
+        y_error = abs(self.y_goal - self.y)
+        dist_to_goal = np.sqrt(x_error**2 + y_error**2)
 
+        # Normalize distance to goal
+        max_possible_dist = np.linalg.norm([self.bounds.x_max, self.bounds.y_max])
+        goal_progress = 1 - (dist_to_goal / max_possible_dist)  # range [0, 1]
+
+        # Obstacle penalty (barrier function)
+        dist_to_obstacle = self.state[0]
+        barrier = ((dist_to_obstacle - self.radius_obst) / self.radius_obst) ** 2
+        obstacle_penalty = -0.05 * barrier  # softer repulsion
+
+        # Step penalty: encourage shorter paths
+        step_penalty = -0.005
+
+        # Combine reward terms
+        raw_reward = goal_progress + obstacle_penalty + step_penalty
+
+        # Smooth the reward
+        reward = 5 * np.tanh(raw_reward)
+
+        # Completion bonus
+        if dist_to_goal < 0.1:
+            reward += 10
+            self.terminate = True
+
+        # Final bookkeeping
         self.steps_left -= 1
         self.check_terminate()
-
-        done = self.steps_left <= 0 or self.terminate
+        terminated = self.terminate
+        truncated = self.steps_left <= 0
         info = {}
-        return self.state, reward, done, info
 
-    def reset(self):
+        return self.state, reward, terminated, truncated, info
+
+    def reset(self, *, seed=None, options=None):
+        if seed is not None:
+            self.seed(seed)
+
         self.terminate = False
         self.x, self.y = self.state_init[0], self.state_init[1]
+
         if self.random_init:
             self.x = np.float32(
-                self.state_init[0] + self.spread[0] * np.random.uniform(0, 1)
+                self.state_init[0] + self.spread[0] * self.np_random.uniform(0, 1)
             )
             self.y = np.float32(
-                self.state_init[1] + self.spread[1] * np.random.uniform(-1.0, 1.0)
+                self.state_init[1] + self.spread[1] * self.np_random.uniform(-1.0, 1.0)
             )
+
             if self.hybridlearning:
                 while not self.M_ext.in_M_ext(
                     np.array([self.x, self.y], dtype=np.float32)
                 ):
                     self.x = np.float32(
-                        self.state_init[0] + self.spread[0] * np.random.uniform(0, 1)
+                        self.state_init[0]
+                        + self.spread[0] * self.np_random.uniform(0, 1)
                     )
                     self.y = np.float32(
                         self.state_init[1]
-                        + self.spread[1] * np.random.uniform(-1.0, 1.0)
+                        + self.spread[1] * self.np_random.uniform(-1.0, 1.0)
                     )
+
         self.update_observation()
         self.steps_left = self.steps
-        return self.state
+
+        return (
+            self.state.copy(),
+            {},
+        )  # 👈 .copy() avoids Gym warnings about shared memory
+
+    def render(self, mode="rgb_array"):
+        fig, ax = plt.subplots(figsize=(4, 4), dpi=100)
+
+        # Plot bounds
+        ax.set_xlim(self.min_x, self.max_x)
+        ax.set_ylim(self.min_y, self.max_y)
+
+        # Obstacle
+        obstacle = plt.Circle(
+            (self.x_obst, self.y_obst), self.radius_obst, color="gray"
+        )
+        ax.add_patch(obstacle)
+
+        # Goal
+        ax.plot(self.x_goal, self.y_goal, "go", markersize=12, label="Goal")
+
+        # Agent
+        ax.plot(self.x, self.y, "bo", markersize=8, label="Agent")
+
+        # Formatting
+        ax.set_aspect("equal")
+        ax.axis("off")
+        plt.tight_layout()
+
+        # Render to RGB array
+        canvas = FigureCanvasAgg(fig)
+        canvas.draw()
+        buf = canvas.buffer_rgba()
+        image = np.asarray(buf, dtype=np.uint8)[..., :3]  # Strip alpha
+        plt.close(fig)
+        return image

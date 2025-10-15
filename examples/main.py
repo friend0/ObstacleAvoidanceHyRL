@@ -18,6 +18,8 @@ from HyRL.utils import (
 )
 from pathlib import Path
 
+MODELS = Path("HyRL/models")
+
 if __name__ == "__main__":
     # Loading in the trained agent
     model = DQN.load(Path("src/HyRL/models") / "dqn_obstacleavoidance")
@@ -71,7 +73,7 @@ if __name__ == "__main__":
     )
 
     # training the new agents
-    training2 = False
+    training2 = True
     if training2:
         for radius in [0.25, 0.50]:
             agent_0 = train_hybrid_agent(

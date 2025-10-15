@@ -12,6 +12,7 @@ from stable_baselines3.common.callbacks import (
     EvalCallback,
     StopTrainingOnRewardThreshold,
 )
+from gymnasium.wrappers import RecordEpisodeStatistics
 
 from typing import Callable, Optional
 import numpy.typing as npt
@@ -104,7 +105,9 @@ def find_critical_points(
                     done = False
                     while done == False:
                         action, _ = model.predict(obs, deterministic=True)
-                        obs, _, done, _ = env.step(action)
+                        obs, reward, terminated, truncated, info = env.step(action)
+                        done = terminated or truncated
+
                     steps_left = env.steps_left
                     if get_state_from_env is None:
                         end_points.append(env.state)
@@ -197,7 +200,8 @@ def find_X_i(M_i, model, horizon=0.3, n_sims=100, t_sampling=0.05):
                     X_i.append(point)
                 else:
                     action, _ = model.predict(obs, deterministic=True)
-                obs, _, done, _ = env_bw.step(action)
+                obs, reward, terminated, truncated, info = env_bw.step(action)
+                done = terminated or truncated
 
         distance = []
         for entry in X_i:
@@ -213,7 +217,7 @@ def train_hybrid_agent(env, save_name, M_exti, load_agent=None, timesteps=200000
     os.makedirs(log_dir, exist_ok=True)
 
     # wrap the environment
-    env = Monitor(env, log_dir)
+    env = RecordEpisodeStatistics(env)
 
     # Separate evaluation env
     eval_env = ObstacleAvoidance(hybridlearning=True, M_ext=M_exti)
@@ -405,12 +409,14 @@ def simulate_obstacleavoidance(
             state_to_observation_OA(state_or + disturbance), deterministic=True
         )
         env_or.state = state_or
-        _, reward_or, done, _ = env_or.step(action_or)
+        obs, reward_or, terminated, truncated, info = env_or.step(action_or)
+        done = terminated or truncated
         state_or = get_state_from_env_OA(env_or)
 
         action_hyb, switch = hybrid_agent.predict(state_hyb + disturbance)
         env_hyb.state = state_hyb
-        _, reward_hyb, done, _ = env_hyb.step(action_hyb)
+        obs, reward_hyb, terminated, truncated, info = env_hyb.step(action_hyb)
+        done = terminated or truncated
         state_hyb = get_state_from_env_OA(env_hyb)
 
         if env_or.terminate:

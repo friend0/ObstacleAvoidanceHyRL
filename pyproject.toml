@@ -10,7 +10,7 @@ dependencies = [
   "torch",
   "scikit-learn",
   "numpy",
-  "stable-baselines3",
+  "stable-baselines3>=2.2.0",
   "betterproto>=1.2.5",
   "grpcio-tools>=1.71.0",
   "grpcio>=1.71.0",

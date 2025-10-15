@@ -211,37 +211,6 @@ class DroneService(obstacle_avoidance_grpc.ObstacleAvoidanceServiceBase):
         print(f"Original path: {orig}")
         print(f"Hybrid path: {hy}")
 
-        # done = False
-        # dist_to_target = np.inf
-        # noise_mag = float(os.getenv("NOISE_MAG", "0.1"))
-        # sign = 1
-        # while not done:
-        #     noise = noise_mag * sign
-        #     disturbance = np.array([0, noise], dtype=np.float32)
-        #     if request.noise:
-        #         obs = state_to_observation_OA(state + disturbance)
-        #     else:
-        #         obs = state_to_observation_OA(state)
-        #     print(f"Current state: {state}, Obs: {obs}")
-        #     action_array, _ = agent.predict(obs)
-        #
-        #     if isinstance(action_array, np.ndarray):
-        #         action = int(action_array.item())
-        #     else:
-        #         action = int(action_array)
-        #
-        #     env.state = state
-        #     _, _, done, _ = env.step(action)
-        #     state = get_state_from_env_OA(env)
-        #     dist_to_target = np.linalg.norm(state - target_pos)
-        #     if dist_to_target < dist_threshold:
-        #         done = True
-        #
-        #     if not env.terminate:
-        #         states.append([state[0], state[1], z_start])
-        #     sign *= -1
-
-        print(f"Switches {switch} ")
         total_states = len(hy)
         states = smooth_path(hy, request.num_waypoints)
         print(
