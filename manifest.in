@@ -1,1 +1,1 @@
-recursive-include src/HyRL/models *.zip
+recursive-include src/hyrl/models *.zip

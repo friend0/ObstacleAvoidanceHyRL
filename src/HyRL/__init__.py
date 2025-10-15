@@ -1,1 +1,1 @@
-from HyRL.HyRL import ObstacleAvoidancePlanner as ObstacleAvoidancePlanner
+from hyrl.HyRL import ObstacleAvoidancePlanner as ObstacleAvoidancePlanner

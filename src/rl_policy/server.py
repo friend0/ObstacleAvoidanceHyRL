@@ -16,15 +16,15 @@ from scipy.interpolate import splprep, splev
 
 from hyrl_api import obstacle_avoidance_grpc
 from hyrl_api import obstacle_avoidance_pb2 as oa_proto
-from HyRL.utils import ObstacleAvoidance
+from hyrl.utils import ObstacleAvoidance
 from dataclasses import dataclass
 from pathlib import Path
 
 
 import numpy as np
 from numpy import linalg as LA
-from HyRL.obstacleavoidance_env import ObstacleAvoidance, BBox, Point, Obstacle
-from HyRL.utils import (
+from hyrl.obstacleavoidance_env import ObstacleAvoidance, BBox, Point, Obstacle
+from hyrl.utils import (
     find_critical_points,
     state_to_observation_OA,
     get_state_from_env_OA,
@@ -53,9 +53,9 @@ class ObstacleAvoidanceModels:
 
 def initialize_hybrid_models():
     # Load pre-trained models
-    main_model_path = files("HyRL.models").joinpath("dqn_obstacleavoidance.zip")
-    agent0_path = files("HyRL.models").joinpath("dqn_obstacleavoidance_0.zip")
-    agent1_path = files("HyRL.models").joinpath("dqn_obstacleavoidance_1.zip")
+    main_model_path = files("hyrl.models").joinpath("dqn_obstacleavoidance.zip")
+    agent0_path = files("hyrl.models").joinpath("dqn_obstacleavoidance_0.zip")
+    agent1_path = files("hyrl.models").joinpath("dqn_obstacleavoidance_1.zip")
 
     model = DQN.load(str(main_model_path))
     agent_0 = DQN.load(str(agent0_path))

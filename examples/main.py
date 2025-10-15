@@ -1,9 +1,9 @@
 import numpy as np
 import matplotlib.pyplot as plt
 from numpy import linalg as LA
-from HyRL.obstacleavoidance_env import ObstacleAvoidance, BBox, Point, Obstacle
+from hyrl.obstacleavoidance_env import ObstacleAvoidance, BBox, Point, Obstacle
 from stable_baselines3 import DQN
-from HyRL.utils import (
+from hyrl.utils import (
     find_critical_points,
     state_to_observation_OA,
     get_state_from_env_OA,
@@ -18,11 +18,11 @@ from HyRL.utils import (
 )
 from pathlib import Path
 
-MODELS = Path("HyRL/models")
+MODELS = Path("hyrl/models")
 
 if __name__ == "__main__":
     # Loading in the trained agent
-    model = DQN.load(Path("src/HyRL/models") / "dqn_obstacleavoidance")
+    model = DQN.load(Path("src/hyrl/models") / "dqn_obstacleavoidance")
     bounds = BBox(x_min=0.0, x_max=3.0, y_min=-1.5, y_max=1.5)
     obstacle = Obstacle(center=Point(x=1.5, y=0.0), r=0.75)
     goal = Point(x=3.0, y=0.0)
@@ -91,8 +91,8 @@ if __name__ == "__main__":
                 timesteps=300000,
             )
     else:
-        agent_0 = DQN.load(Path("src/HyRL/models") / "dqn_obstacleavoidance_0")
-        agent_1 = DQN.load(Path("src/HyRL/models") / "dqn_obstacleavoidance_1")
+        agent_0 = DQN.load(Path("src/hyrl/models") / "dqn_obstacleavoidance_0")
+        agent_1 = DQN.load(Path("src/hyrl/models") / "dqn_obstacleavoidance_1")
 
     # simulation the hybrid agent compared to the original agent
     starting_conditions = [

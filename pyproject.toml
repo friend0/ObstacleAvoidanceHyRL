@@ -7,7 +7,7 @@ requires-python = ">=3.11"
 dependencies = [
   "shimmy",
   "gymnasium",
-  "torch",
+  "torch>=2.0.0",
   "scikit-learn",
   "numpy",
   "stable-baselines3>=2.2.0",
@@ -30,13 +30,14 @@ build-backend = "setuptools.build_meta"
 
 [tool.setuptools]
 package-dir = { "" = "src" }
-# packages = ["HyRL", "rl_policy", "hyrl_api"]
+# packages = ["hyrl", "rl_policy", "hyrl_api"]
 
 [tool.setuptools.package-data]
-"HyRL" = ["models/*.zip"]
+"hyrl" = ["models/*.zip"]
 
 [tool.uv]
 package = true
+extra-index-url = ["https://download.pytorch.org/whl/cpu"]
 
 [dependency-groups]
 dev = ["matplotlib", "setuptools"]

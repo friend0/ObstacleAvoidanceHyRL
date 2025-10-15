@@ -1,9 +1,9 @@
-import HyRL
+import hyrl
 import numpy as np
 from numpy import linalg as LA
-from HyRL.obstacleavoidance_env import ObstacleAvoidance, BBox, Obstacle, Point, State
+from hyrl.obstacleavoidance_env import ObstacleAvoidance, BBox, Obstacle, Point, State
 from stable_baselines3 import DQN
-from HyRL.utils import (
+from hyrl.utils import (
     find_critical_points,
     state_to_observation,
     state_to_observation_OA,
@@ -25,7 +25,7 @@ class AgentSelect(Enum):
 
 
 class ObstacleAvoidancePlanner:
-    MODELS = Path("HyRL/models")
+    MODELS = Path("hyrl/models")
 
     def __init__(
         self,

@@ -6,7 +6,7 @@ import matplotlib
 import matplotlib.pyplot as plt
 from numpy import linalg as LA
 from sklearn.cluster import KMeans
-from HyRL.obstacleavoidance_env import ObstacleAvoidance, BBox, Obstacle, Point, State
+from hyrl.obstacleavoidance_env import ObstacleAvoidance, BBox, Obstacle, Point, State
 from stable_baselines3 import DQN
 from stable_baselines3.common.callbacks import (
     EvalCallback,
