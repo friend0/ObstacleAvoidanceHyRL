@@ -1,5 +1,5 @@
 [project]
-name = "HyRL"
+name = "hyrl"
 version = "1.0.0"
 description = "Hybrid Reinforcement Learning server for obstacle avoidance"
 readme = "README.md"
