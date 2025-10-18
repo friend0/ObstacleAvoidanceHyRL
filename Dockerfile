@@ -16,7 +16,7 @@ RUN useradd -m -d /app hyrl-user
 WORKDIR /app
 
 # Copy all necessary files for build
-COPY pyproject.toml README.md ./
+COPY pyproject.toml README.md .env ./
 COPY src/ ./src/
 COPY Makefile ./
 COPY protos/ ./protos/
