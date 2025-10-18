@@ -160,5 +160,36 @@
         # Alias to make run the same as default
         run = self.devShells.${pkgs.system}.default;
       });
+
+      packages = forEachSupportedSystem ({ pkgs }: {
+        default = pkgs.writeShellApplication {
+          name = "hyrl-server";
+          runtimeInputs = with pkgs; [
+            python310
+            python310Packages.uv
+          ];
+          text = ''
+            # Create a temporary working directory
+            WORK_DIR=$(mktemp -d)
+            trap 'rm -rf "$WORK_DIR"' EXIT
+            
+            # Copy source to writable location
+            cp -r "${./.}"/* "$WORK_DIR/"
+            chmod -R u+w "$WORK_DIR"
+            cd "$WORK_DIR"
+            
+            # Set up Python path and run
+            export PYTHONPATH="$WORK_DIR/src:''${PYTHONPATH:+:$PYTHONPATH}"
+            exec ${pkgs.python310Packages.uv}/bin/uv run python -m rl_policy.server "$@"
+          '';
+        };
+      });
+
+      apps = forEachSupportedSystem ({ pkgs }: {
+        default = {
+          type = "app";
+          program = "${self.packages.${pkgs.system}.default}/bin/hyrl-server";
+        };
+      });
     };
 }
