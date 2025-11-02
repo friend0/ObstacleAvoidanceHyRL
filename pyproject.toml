@@ -31,8 +31,8 @@ dependencies = [
 ]
 
 [tool.setuptools]
-package-dir = { "" = "src" }
-packages = ["rl_policy", "hyrl_api"]
+package-dir = { "" = "src", "HyRL" = "HyRL" }
+packages = ["rl_policy", "hyrl_api", "HyRL"]
 
 [tool.setuptools.package-data]
 "HyRL" = ["models/*"]
