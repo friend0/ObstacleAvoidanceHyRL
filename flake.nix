@@ -10,6 +10,34 @@
         nixpkgs.lib.genAttrs supportedSystems
         (system: f { pkgs = import nixpkgs { system = system; config.allowUnfree = true; }; });
     in {
+      packages = forEachSupportedSystem ({ pkgs }: {
+        default = pkgs.writeShellScriptBin "hyrl-server" ''
+          export PATH="${pkgs.python310}/bin:$PATH"
+          export LD_LIBRARY_PATH=${pkgs.gcc.cc.lib}/lib:$LD_LIBRARY_PATH
+          
+          # Create a temporary working directory
+          WORK_DIR=$(mktemp -d)
+          trap "rm -rf $WORK_DIR" EXIT
+          
+          # Copy source to writable location
+          cp -r ${self}/* $WORK_DIR/
+          cd $WORK_DIR
+          
+          # Set PYTHONPATH to include src directory
+          export PYTHONPATH="$WORK_DIR/src:$PYTHONPATH"
+          
+          # Run the server using uv
+          exec ${pkgs.python310Packages.uv}/bin/uv run python src/rl_policy/server.py
+        '';
+      });
+
+      apps = forEachSupportedSystem ({ pkgs }: {
+        default = {
+          type = "app";
+          program = "${self.packages.${pkgs.system}.default}/bin/hyrl-server";
+        };
+      });
+
       devShells = forEachSupportedSystem ({ pkgs }: {
         # Default shell for just running the code (minimal setup)
         default = pkgs.mkShell {

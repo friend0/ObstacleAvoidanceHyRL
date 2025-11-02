@@ -498,7 +498,7 @@ def visualize_M_ext(M_ext, figure_number, resolution=50):
     plt.plot(M_ext.M_i.M_star[:, 0], M_ext.M_i.M_star[:, 1], color="red")
     obstacle = matplotlib.patches.Circle((1.5, 0.0), radius=0.75, color="gray")
     plt.gca().add_patch(obstacle)
-    plt.text(1.42, -0.1, "$\mathcal{C}$", fontsize=22)
+    plt.text(1.42, -0.1, r"$\mathcal{C}$", fontsize=22)
     cbar = plt.colorbar(ticks=[-1, 0, 1])
     plt.clim(-1, 1)
     cbar.ax.tick_params(labelsize=18)
