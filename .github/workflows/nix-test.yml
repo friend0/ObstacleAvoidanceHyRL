@@ -55,7 +55,7 @@ jobs:
           echo 'Server started with PID: '\$SERVER_PID
           
           # Wait a moment for server to initialize
-          sleep 10
+          sleep 30
           
           # Test if server is responding (basic connection test)
           if grpcurl -plaintext localhost:50051 list; then
