@@ -23,8 +23,8 @@
           cp -r ${self}/* $WORK_DIR/
           cd $WORK_DIR
           
-          # Set PYTHONPATH to include src directory
-          export PYTHONPATH="$WORK_DIR/src:$PYTHONPATH"
+          # Set PYTHONPATH to include both src and root directories
+          export PYTHONPATH="$WORK_DIR/src:$WORK_DIR:$PYTHONPATH"
           
           # Run the server using uv
           exec ${pkgs.python310Packages.uv}/bin/uv run python src/rl_policy/server.py
