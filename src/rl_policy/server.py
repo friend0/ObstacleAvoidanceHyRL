@@ -64,7 +64,7 @@ def setup_logging():
 def load_config():
     """Load configuration from environment variables with defaults"""
     return {
-        'host': os.getenv('HOST', '127.0.0.1'),
+        'host': os.getenv('HOST', '0.0.0.0'),
         'port': int(os.getenv('PORT', '50051')),
         'model_path': os.getenv('MODEL_PATH', 'src/hyrl/models'),
         'use_hybrid_models': os.getenv('USE_HYBRID_MODELS', 'true').lower() in ('true', '1', 'yes', 'on'),
