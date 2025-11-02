@@ -1,7 +1,9 @@
 from setuptools import setup, find_packages
+import io
+import os
 
 setup(
-    name="HyRL",
+    name="hyrl",
     version="1.0.0",
     description="Hybrid Reinforcement Learning for Obstacle Avoidance",
     long_description=open("README.md", "r", encoding="utf-8").read(),
@@ -9,11 +11,11 @@ setup(
     author="HSL-UCSC",
     url="https://github.com/HSL-UCSC/ObstacleAvoidanceHyRL",
     # Automatically find packages, but exclude 'examples' and 'tests' directories.
-    packages=find_packages(exclude=["examples", "tests"]),
+    packages=find_packages(where="src", exclude=["tests*", "examples*"]),
+    package_dir={"": "src"},
+    include_package_data=True,
     package_data={
-        # This tells setuptools to include all files under the "models" subdirectory
-        # of the HyRL package.
-        "HyRL": ["models/*"],
+        "hyrl": ["models/*.zip"],  # all files in models/
     },
     install_requires=[
         "gym",

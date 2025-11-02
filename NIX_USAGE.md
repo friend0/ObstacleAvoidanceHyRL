@@ -1,12 +1,10 @@
-# Obstacle Avoidance Service with HyRL
+# HyRL Server Nix Package
 
-The simulation files for Hysteresis-Based Reinforcement Laerning, as introduced in Hysteresis-Based RL: Robustifying Reinforcement Learning-based Control Policies via Hybrid Control. J. de Priester, R. G. Sanfelice, and N. van de Wouw. Proceedings of the American Control Conference, June, 2022.
+This repository provides a Nix flake that packages the HyRL obstacle avoidance server as a Docker container.
 
-# Running the HyRL Server
+## Prerequisites
 
-## Pre-requisites
-
-- Nix installed if you intend to run with Nix, else an operational container runtime, e.g. Docker, Podman. See a simple installer for Nix [here](https://determinate.systems/nix-installer/)
+- [Nix](https://nixos.org/download.html) with flakes enabled
 - [Docker](https://docs.docker.com/get-docker/) installed and running
 
 ## Quick Start
@@ -15,7 +13,7 @@ The simulation files for Hysteresis-Based Reinforcement Laerning, as introduced 
 
 ```bash
 # Run the server directly (builds Docker image if needed)
-nix run github:friend0/ObstacleAvoidanceHyRL
+nix run github:your-username/ObstacleAvoidanceHyRL
 
 # Or clone and run locally
 git clone https://github.com/your-username/ObstacleAvoidanceHyRL
@@ -24,7 +22,6 @@ nix run .
 ```
 
 The server will:
-
 1. Build a Docker image if it doesn't exist
 2. Start the container on port 50051
 3. Expose the gRPC API for your simulation framework
@@ -81,7 +78,6 @@ your-simulation      # Run your simulation
 ## Server Configuration
 
 The server runs with these defaults:
-
 - **Port**: 50051 (gRPC)
 - **Models**: Pre-trained DQN models included
 - **Environment**: Containerized Python environment with all dependencies

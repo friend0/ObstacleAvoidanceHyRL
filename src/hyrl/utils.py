@@ -1,5 +1,4 @@
 import os
-
 import gymnasium as gym
 import numpy as np
 import torch as th
@@ -7,7 +6,7 @@ import matplotlib
 import matplotlib.pyplot as plt
 from numpy import linalg as LA
 from sklearn.cluster import KMeans
-from HyRL.obstacleavoidance_env import ObstacleAvoidance, BBox, Obstacle, Point, State
+from hyrl.obstacleavoidance_env import ObstacleAvoidance, BBox, Obstacle, Point, State
 from stable_baselines3 import DQN
 from stable_baselines3.common.callbacks import (
     EvalCallback,
@@ -356,11 +355,12 @@ class HyRL_agent:
         self.q = q_init
 
     def predict(self, state):
-        switch = -10
+        switch = -1
         if self.q == 0:
             if self.M_ext0.in_M_ext(state):
                 active_agent = self.agent_0
             else:
+                print(f'Switching q to 1: {state}')
                 switch = 1
                 self.q = 1
                 active_agent = self.agent_1
@@ -369,6 +369,7 @@ class HyRL_agent:
             if self.M_ext1.in_M_ext(state):
                 active_agent = self.agent_1
             else:
+                print(f'Switching q to 0: {state}')
                 switch = 1
                 self.q = 0
                 active_agent = self.agent_0
@@ -382,7 +383,7 @@ def simulate_obstacleavoidance(
     hybrid_agent,
     original_agent,
     state_init,
-    noise_mag=0.1,
+    noise_mag=0.045,
     figure_number=3,
     show_switches=False,
 ):
@@ -488,7 +489,7 @@ def simulate_obstacleavoidance(
     # plt.ylabel("$y$", fontsize=22)
     # plt.tight_layout()
     print("reward original", score_or, " reward hybrid", score_hyb)
-    return states_or, states_hyb, switch
+    return states_or, states_hyb, switches
 
 
 def visualize_M_ext(M_ext, figure_number, resolution=50):
@@ -505,7 +506,6 @@ def visualize_M_ext(M_ext, figure_number, resolution=50):
     plt.plot(M_ext.M_i.M_star[:, 0], M_ext.M_i.M_star[:, 1], color="red")
     obstacle = matplotlib.patches.Circle((1.5, 0.0), radius=0.75, color="gray")
     plt.gca().add_patch(obstacle)
-    plt.text(1.42, -0.1, "$\mathcal{C}$", fontsize=22)
     cbar = plt.colorbar(ticks=[-1, 0, 1])
     plt.clim(-1, 1)
     cbar.ax.tick_params(labelsize=18)
@@ -515,3 +515,5 @@ def visualize_M_ext(M_ext, figure_number, resolution=50):
     plt.xlabel("$x$", fontsize=22)
     plt.ylabel("$y$", fontsize=22)
     plt.tight_layout()
+    plt.savefig(f"M_ext_{figure_number}.png", format="png")
+    plt.show(block=True)

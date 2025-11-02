@@ -1,11 +1,16 @@
 import numpy as np
 import matplotlib
 import matplotlib.pyplot as plt
+from matplotlib.colors import BoundaryNorm
+from matplotlib.ticker import MaxNLocator
 from matplotlib.colors import ListedColormap, BoundaryNorm
 from scipy.ndimage import median_filter
 from stable_baselines3 import DQN
 from stable_baselines3.common.vec_env import DummyVecEnv, VecNormalize
 from obstacleavoidance_env import ObstacleAvoidance
+from importlib.resources import path
+from importlib.resources import files
+import importlib.resources as pkg_resources
 
 matplotlib.rcParams["text.usetex"] = False
 
@@ -33,7 +38,13 @@ def plot_policy(model, resolution=150, figure_number=1):
             action, _ = model.predict(obs, deterministic=True)
             actions[idy, idx] = (action - 2) / 2
     x, y = np.meshgrid(x_, y_)
-    plt.scatter(x, y, s=15, c=actions)
+    
+    # Create discrete colormap with boundaries
+    levels = [-1, -0.5, 0, 0.5, 1]
+    cmap = plt.cm.viridis
+    norm = BoundaryNorm(levels, ncolors=cmap.N, clip=True)
+    
+    plt.scatter(x, y, s=15, c=actions, cmap=cmap, norm=norm)
     obstacle = matplotlib.patches.Circle((1.5, 0.0), radius=0.75, color="gray")
     critical = matplotlib.patches.Circle(
         (0.375, 0.0), radius=0.375, color="red", fill=None
@@ -41,7 +52,7 @@ def plot_policy(model, resolution=150, figure_number=1):
     plt.gca().add_patch(obstacle)
     plt.gca().add_patch(critical)
     # plt.text(1.42, -0.1, '$\mathcal{O}$', fontsize=22)
-    cbar = plt.colorbar(ticks=[-1, 0, 1])
+    cbar = plt.colorbar(ticks=[1, 0.5, 0, -0.5, -1], boundaries=levels, extend='neither')
     cbar.ax.tick_params(labelsize=18)
     cbar.set_label("$u$", rotation=270, fontsize=22, labelpad=22)
     plt.grid()
@@ -54,7 +65,9 @@ def plot_policy(model, resolution=150, figure_number=1):
 
 plt.close("all")
 env = ObstacleAvoidance()
-model = DQN.load("models/dqn_obstacleavoidance", env)
 
-plot_policy(model)
+# model = files("HyRL.models").joinpath("dqn_obstacleavoidance.zip")
+model = DQN.load("src/HyRL/models/dqn_obstacleavoidance")
+
+plot_policy(model, resolution=300)
 plt.savefig("ObstAvoid_criticPoint_policyMap.eps", format="eps")

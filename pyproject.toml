@@ -1,14 +1,13 @@
 [project]
-name = "HyRL"
+name = "hyrl"
 version = "1.0.0"
-description = "Add your description here"
+description = "Hybrid Reinforcement Learning server for obstacle avoidance"
 readme = "README.md"
 requires-python = ">=3.11"
-
 dependencies = [
   "shimmy",
-  "gym",
-  "torch",
+  "gymnasium",
+  "torch>=2.0.0",
   "scikit-learn",
   "numpy",
   "stable-baselines3>=2.2.0",
@@ -17,25 +16,26 @@ dependencies = [
   "grpcio>=1.71.0",
   "grpclib>=0.4.7",
   "protobuf>=5.29.4",
-
-
-  "betterproto>=1.2.5",
-  "grpcio-tools>=1.71.0",
-  "grpcio>=1.71.0",
-  "grpclib>=0.4.7",
-  "protobuf>=5.29.4",
-  "jinja2>=3.1.0",
-
   "matplotlib>=3.7.0",
-  "dotenv>=0.9.9",
+  "python-dotenv>=0.9.9",
 ]
 
+[project.scripts]
+hyrl-server = "rl_policy.server:main"
+
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
 [tool.setuptools]
-package-dir = { "" = "src" }
-packages = ["rl_policy", "hyrl_api"]
+package-dir = {"" = "src"}
+packages = ["hyrl", "rl_policy", "hyrl_api"]
 
 [tool.setuptools.package-data]
-"HyRL" = ["models/*"]
+"hyrl" = ["models/*.zip"]
+
+[tool.uv]
+package = true
 
 [dependency-groups]
 dev = ["matplotlib", "setuptools"]

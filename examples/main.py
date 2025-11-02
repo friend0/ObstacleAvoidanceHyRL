@@ -1,9 +1,9 @@
 import numpy as np
 import matplotlib.pyplot as plt
 from numpy import linalg as LA
-from HyRL.obstacleavoidance_env import ObstacleAvoidance, BBox, Point, Obstacle
+from hyrl.obstacleavoidance_env import ObstacleAvoidance, BBox, Point, Obstacle
 from stable_baselines3 import DQN
-from HyRL.utils import (
+from hyrl.utils import (
     find_critical_points,
     state_to_observation_OA,
     get_state_from_env_OA,
@@ -18,11 +18,11 @@ from HyRL.utils import (
 )
 from pathlib import Path
 
-MODELS = Path("HyRL/models")
+MODELS = Path("hyrl/models")
 
 if __name__ == "__main__":
     # Loading in the trained agent
-    model = DQN.load(MODELS / "dqn_obstacleavoidance")
+    model = DQN.load(Path("src/hyrl/models") / "dqn_obstacleavoidance")
     bounds = BBox(x_min=0.0, x_max=3.0, y_min=-1.5, y_max=1.5)
     obstacle = Obstacle(center=Point(x=1.5, y=0.0), r=0.75)
     goal = Point(x=3.0, y=0.0)
@@ -35,6 +35,7 @@ if __name__ == "__main__":
         obstacle,
         goal,
         model,
+        # steps=10,
         environent=ObstacleAvoidance,
         custom_state_to_observation=state_to_observation(obstacle, goal),
         get_state_from_env=get_state_from_env_OA,
@@ -56,9 +57,10 @@ if __name__ == "__main__":
     import pickle
 
     # Pack your variables into a dictionary
-    np.savez("critical_points.npz", M_star=M_star)
+    # np.savez("critical_points.npz", M_star=M_star)
 
     # visualizing the extended sets
+    print("Visualizing the extended sets...")
     visualize_M_ext(M_ext0, figure_number=1)
     visualize_M_ext(M_ext1, figure_number=2)
 
@@ -89,26 +91,27 @@ if __name__ == "__main__":
                 timesteps=300000,
             )
     else:
-        agent_0 = DQN.load(Path("HyRL/models") / "dqn_obstacleavoidance_0")
-        agent_1 = DQN.load(Path("HyRL/models") / "dqn_obstacleavoidance_1")
+        agent_0 = DQN.load(Path("src/hyrl/models") / "dqn_obstacleavoidance_0")
+        agent_1 = DQN.load(Path("src/hyrl/models") / "dqn_obstacleavoidance_1")
 
     # simulation the hybrid agent compared to the original agent
     starting_conditions = [
         np.array([0.0, 0.0], dtype=np.float32),
-        np.array([0.0, 0.055], dtype=np.float32),
-        np.array([0.0, -0.055], dtype=np.float32),
-        np.array([0.0, 0.15], dtype=np.float32),
-        np.array([0.0, -0.15], dtype=np.float32),
+        # np.array([0.0, 0.055], dtype=np.float32),
+        # np.array([0.0, -0.055], dtype=np.float32),
+        # np.array([0.0, 0.15], dtype=np.float32),
+        # np.array([0.0, -0.15], dtype=np.float32),
         np.array([0.0, 0.25], dtype=np.float32),
         np.array([0.0, -0.25], dtype=np.float32),
     ]
     for q in range(2):
-        print(f"Simulating for q = {q}")
+        print(f"========== Simulating for q = {q} ==========")
         for state_init in starting_conditions:
-            print(f"Starting condition: {state_init}")
+            print(f"Initial condition: {state_init}")
             hybrid_agent = HyRL_agent(agent_0, agent_1, M_ext0, M_ext1, q_init=q)
             simulate_obstacleavoidance(
-                hybrid_agent, model, state_init, figure_number=3 + q
+                hybrid_agent, model, state_init, noise_mag=.15,figure_number=3 + q
             )
-        save_name = "OA_HyRLDQN_Sim_q" + str(q) + ".png"
-        plt.savefig(save_name, format="png")
+            print()
+        save_name = f"OA_HyRLDQN_Sim_q{}_25" + ".pdf"
+        plt.savefig(save_name, format="pdf")
