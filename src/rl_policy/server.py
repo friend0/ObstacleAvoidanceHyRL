@@ -39,7 +39,6 @@ from HyRL.utils import (
 )
 from pathlib import Path
 
-from importlib.resources import path
 import importlib.resources as pkg_resources
 
 
@@ -52,20 +51,18 @@ class ObstacleAvoidanceModels:
 
 def initialize_hybrid_models():
     # Load pre-trained models
-    with path("HyRL", "models", "dqn_obstacleavoidance") as model_dir:
-        model_path = Path(model_dir)
-        print(f"Loading main model from {model_path}")
-        model = DQN.load(str(model_path))
+    model_files = pkg_resources.files("HyRL") / "models"
+    model_path = model_files / "dqn_obstacleavoidance"
+    print(f"Loading main model from {model_path}")
+    model = DQN.load(str(model_path))
 
-    with path("HyRL", "models", "dqn_obstacleavoidance_0") as a0_dir:
-        a0_path = Path(a0_dir)
-        print(f"Loading agent_0 from {a0_path}")
-        agent_0 = DQN.load(str(a0_path))
+    a0_path = model_files / "dqn_obstacleavoidance_0"
+    print(f"Loading agent_0 from {a0_path}")
+    agent_0 = DQN.load(str(a0_path))
 
-    with path("HyRL", "models", "dqn_obstacleavoidance_1") as a1_dir:
-        a1_path = Path(a1_dir)
-        print(f"Loading agent_1 from {a1_path}")
-        agent_1 = DQN.load(str(a1_path))
+    a1_path = model_files / "dqn_obstacleavoidance_1"
+    print(f"Loading agent_1 from {a1_path}")
+    agent_1 = DQN.load(str(a1_path))
 
     print("✅ Successfully loaded pre-trained models")
 
