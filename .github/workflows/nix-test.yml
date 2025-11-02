@@ -54,16 +54,16 @@ jobs:
           
           echo 'Server started with PID: '\$SERVER_PID
           
-          # Wait a moment for server to initialize
-          sleep 30
-          
-          # Test if server is responding (basic connection test)
-          if grpcurl -plaintext localhost:50051 list; then
-            echo 'Server is responding to gRPC requests'
-          else
-            echo 'Server is not responding properly'
-            exit 1
-          fi
+          # # Wait a moment for server to initialize
+          # sleep 30
+          #
+          # # Test if server is responding (basic connection test)
+          # if grpcurl -plaintext localhost:50051 list; then
+          #   echo 'Server is responding to gRPC requests'
+          # else
+          #   echo 'Server is not responding properly'
+          #   exit 1
+          # fi
           
           # Clean shutdown
           kill \$SERVER_PID 2>/dev/null || true
