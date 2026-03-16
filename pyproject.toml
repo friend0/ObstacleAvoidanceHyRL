@@ -29,5 +29,8 @@ packages = ["rl_policy", "hyrl_api", "HyRL"]
 [tool.setuptools.package-data]
 "HyRL" = ["models/*"]
 
+[project.scripts]
+hyrl-server = "rl_policy.server:main"
+
 [dependency-groups]
 dev = ["matplotlib", "setuptools"]

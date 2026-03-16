@@ -208,7 +208,7 @@ class DroneService(obstacle_avoidance_grpc.ObstacleAvoidanceServiceBase):
         print(f"Simulating obstacle avoidance with agent: {agent}")
 
         orig, hy, switch = simulate_obstacleavoidance(
-            self.hybrid_agent_q1, self.agent, state
+            agent, self.agent, state
         )
 
         print(f"Original path: {orig}")
@@ -259,7 +259,7 @@ class DroneService(obstacle_avoidance_grpc.ObstacleAvoidanceServiceBase):
         await stream.send_message(response)
 
 
-async def main():
+async def async_main():
     # Initialize the hybrid agent at startup
     print("Initializing RL models...")
     hybrid_agent = initialize_hybrid_models()
@@ -286,7 +286,12 @@ async def main():
     print("Server Stopped.")
 
 
-if __name__ == "__main__":
+def main():
+    """Main entrypoint for the hyrl-server command"""
     load_dotenv()
     print("Starting gRPC server...")
-    asyncio.run(main())
+    asyncio.run(async_main())
+
+
+if __name__ == "__main__":
+    main()
