@@ -194,6 +194,8 @@ class DroneService(obstacle_avoidance_grpc.ObstacleAvoidanceServiceBase):
 
         # Agent select
         # The q0 agent will bias to go up and around the obstacle, while q1 will bias to go the other way around
+        print(f"DEBUG model_type: {request.model_type}, type: {type(request.model_type)}, STANDARD={oa_proto.ModelType.STANDARD}, HYBRID={oa_proto.ModelType.HYBRID}")
+        print(f"DEBUG comparison: model_type == STANDARD? {request.model_type == oa_proto.ModelType.STANDARD}")
         agent = self.agent_select(request.state, request.model_type)
 
         # t_sampling = request.sampling_time if request.sampling_time else 0.05
