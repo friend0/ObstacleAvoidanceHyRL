@@ -245,7 +245,10 @@ class DroneService(obstacle_avoidance_grpc.ObstacleAvoidanceServiceBase):
         #     sign *= -1
 
         total_states = len(hy)
-        states = smooth_path(hy, request.num_waypoints)
+        if request.model_type == oa_proto.ModelType.STANDARD:
+            states = smooth_path(orig, request.num_waypoints)
+        else:
+            states = smooth_path(hy, request.num_waypoints)
         print(
             f"Generated trajectory with {total_states} states, smoothed to {len(states)} waypoints"
         )
